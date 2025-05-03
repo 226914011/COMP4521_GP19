@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/custom_bottom_bar.dart';
 import '../widgets/player_container.dart';
+import '../widgets/custom_button.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -48,37 +49,10 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildActionButton({
-    required String text,
-    VoidCallback? onPressed
-  }) {
-    return SizedBox(
-      width: MediaQuery.of(context).size.width * 0.1,
-      height: MediaQuery.of(context).size.height * 0.08,
-      child: TextButton(
-        style: TextButton.styleFrom(
-          backgroundColor: Theme.of(context).colorScheme.secondary,
-          padding: EdgeInsets.zero,
-          minimumSize: Size.zero,
-          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
-        ),
-        onPressed: onPressed,
-        child: Text(
-          text,
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.onSecondary,
-            fontSize: 12,
-          ),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
+    final deviceSize = MediaQuery.of(context).size;
+
     return Scaffold(
       body: SafeArea(child:
         Column(
@@ -146,9 +120,13 @@ class _HomePageState extends State<HomePage> {
                             child: const Text('Prevalent wind: East',
                                 style: TextStyle(fontSize: 16)),
                           )
-                        : ElevatedButton(
+                        : CustomButton(
+                            text: 'Start Game',
+                            width: deviceSize.width * 0.2,
+                            height: deviceSize.height * 0.15,
+                            fontSize: 18,
+                            borderRadius: deviceSize.width * 0.1,
                             onPressed: _checkStartGame,
-                            child: const Text('Start Game'),
                           ),
                   ),
 
@@ -182,9 +160,9 @@ class _HomePageState extends State<HomePage> {
                         ? Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              _buildActionButton(text: 'Draw', onPressed: _draw),
+                              CustomButton(text: 'Draw', onPressed: _draw),
                               const SizedBox(height: 5),
-                              _buildActionButton(text: 'Win', onPressed: _win),
+                              CustomButton(text: 'Win', onPressed: _win),
                             ],
                           )
                         : const SizedBox.shrink(),
