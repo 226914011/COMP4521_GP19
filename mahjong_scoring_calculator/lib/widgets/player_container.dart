@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
 
-class PlayerContainer extends StatefulWidget {
-  const PlayerContainer({super.key});
+class PlayerContainer extends StatelessWidget {
+  final bool hasPlayer;
+  final VoidCallback onAdd;
+  final VoidCallback onReset;
 
-  @override
-  State<PlayerContainer> createState() => _PlayerContainerState();
-}
-
-class _PlayerContainerState extends State<PlayerContainer> {
-  bool hasPlayer = false;
-  String playerName = 'Frankie';
-  int score = 4521;
+  const PlayerContainer({
+    super.key,
+    required this.hasPlayer,
+    required this.onAdd,
+    required this.onReset,
+  });
 
   @override
   Widget build(BuildContext context) {
     final deviceSize = MediaQuery.of(context).size;
     final containerWidth = deviceSize.width * 0.25;
-    final containerHeight = deviceSize.height * 0.25;
+    final containerHeight = deviceSize.height * 0.22;
 
     return Container(
       width: containerWidth,
@@ -32,8 +32,8 @@ class _PlayerContainerState extends State<PlayerContainer> {
   Widget _buildAddButton() {
     return Center(
       child: IconButton(
-        icon: const Icon(Icons.add_circle, size: 50),
-        onPressed: () => setState(() => hasPlayer = true),
+        icon: const Icon(Icons.add_circle, size: 36),
+        onPressed: onAdd,
       ),
     );
   }
@@ -41,29 +41,26 @@ class _PlayerContainerState extends State<PlayerContainer> {
   Widget _buildPlayerView() {
     return Stack(
       children: [
-        // Player Name
         Positioned(
-          left: 8,
-          top: 8,
+          left: 10,
+          top: 10,
           child: Text(
-            playerName,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            'Frankie',
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
           ),
         ),
-        // Score
         Center(
           child: Text(
-            score.toString(),
-            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w500),
+            '4521',
+            style: const TextStyle(fontSize: 18),
           ),
         ),
-        // Reset Button
         Positioned(
-          right: 8,
-          top: 8,
+          right: -4,
+          top: -4,
           child: IconButton(
-            icon: const Icon(Icons.restart_alt, size: 24),
-            onPressed: () => setState(() => hasPlayer = false),
+            icon: const Icon(Icons.restart_alt, size: 15),
+            onPressed: onReset,
           ),
         ),
       ],

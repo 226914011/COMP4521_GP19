@@ -4,12 +4,12 @@ import 'pages/home_page.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,
-  ]).then((_) {
-    runApp(const MyApp());
-  });
+  ]);
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Test App',
+      title: 'Mahjong Scoring Calculator',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
