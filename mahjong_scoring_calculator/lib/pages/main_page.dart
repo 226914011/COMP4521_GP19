@@ -68,6 +68,7 @@ class _MainPageState extends State<MainPage> {
                   // (0,1)
                   _buildGridCell(PlayerContainer(
                     hasPlayer: hasPlayers[0],
+                    gameStarted: gameStarted,
                     onAdd: () => setState(() => hasPlayers[0] = true),
                     onReset: () => setState(() => hasPlayers[0] = false),
                   )),
@@ -103,6 +104,7 @@ class _MainPageState extends State<MainPage> {
                 children: [
                   // (1,0)
                   _buildGridCell(PlayerContainer(
+                    gameStarted: gameStarted,
                     hasPlayer: hasPlayers[1],
                     onAdd: () => setState(() => hasPlayers[1] = true),
                     onReset: () => setState(() => hasPlayers[1] = false),
@@ -133,6 +135,7 @@ class _MainPageState extends State<MainPage> {
 
                   // (1,2)
                   _buildGridCell(PlayerContainer(
+                    gameStarted: gameStarted,
                     hasPlayer: hasPlayers[2],
                     onAdd: () => setState(() => hasPlayers[2] = true),
                     onReset: () => setState(() => hasPlayers[2] = false),
@@ -150,6 +153,7 @@ class _MainPageState extends State<MainPage> {
 
                   // (2,1)
                   _buildGridCell(PlayerContainer(
+                    gameStarted: gameStarted,
                     hasPlayer: hasPlayers[3],
                     onAdd: () => setState(() => hasPlayers[3] = true),
                     onReset: () => setState(() => hasPlayers[3] = false),
@@ -159,10 +163,9 @@ class _MainPageState extends State<MainPage> {
                   _buildGridCell(
                     gameStarted
                         ? Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
                               CustomButton(text: 'Draw', onPressed: _draw),
-                              const SizedBox(height: 5),
                               CustomButton(text: 'Win', onPressed: _win),
                             ],
                           )
