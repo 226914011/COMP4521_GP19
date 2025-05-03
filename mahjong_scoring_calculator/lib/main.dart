@@ -1,6 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'pages/main_page.dart';
+import 'pages/winning_tile_page.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,8 +23,12 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const HomePage(),
+      home: const MainPage(),
       debugShowCheckedModeBanner: false,
+      routes: {
+        '/main': (context) => const MainPage(),
+        '/winning_tile': (context) => const WinningTilePage(),
+      }
     );
   }
 }

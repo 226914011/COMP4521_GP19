@@ -2,15 +2,16 @@ import 'package:flutter/material.dart';
 import '../widgets/custom_bottom_bar.dart';
 import '../widgets/player_container.dart';
 import '../widgets/custom_button.dart';
+import 'winning_tile_page.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class MainPage extends StatefulWidget {
+  const MainPage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<MainPage> createState() => _MainPageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _MainPageState extends State<MainPage> {
   bool gameStarted = false;
   final List<bool> hasPlayers = [false, false, false, false];
   final playerNames = ['', '', '', ''];
@@ -173,7 +174,12 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
-      bottomNavigationBar: const CustomBottomBar(),
+      bottomNavigationBar: CustomBottomBar(
+          onDebugPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const WinningTilePage()),
+          ),
+      ),
     );
   }
 

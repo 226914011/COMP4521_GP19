@@ -3,7 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class CustomBottomBar extends StatefulWidget {
-  const CustomBottomBar({super.key});
+  final VoidCallback? onDebugPressed;
+  final VoidCallback? onHelpPressed;
+  final VoidCallback? onSettingsPressed;
+
+  const CustomBottomBar({
+    super.key,
+    this.onDebugPressed,
+    this.onHelpPressed,
+    this.onSettingsPressed,
+  });
 
   @override
   State<CustomBottomBar> createState() => _CustomBottomBarState();
@@ -35,9 +44,9 @@ class _CustomBottomBarState extends State<CustomBottomBar> {
 
   final bool debugMode = true;
   
-  static void _handleDebug() {}
-  static void _handleHelp() {}
-  static void _handleSettings() {}
+  void _handleDebug() => widget.onDebugPressed?.call();
+  void _handleHelp() => widget.onHelpPressed?.call();
+  void _handleSettings() => widget.onSettingsPressed?.call();
 
   Widget _buildButton({
     required double width,
