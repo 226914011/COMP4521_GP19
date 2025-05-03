@@ -3,16 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class CustomBottomBar extends StatefulWidget {
-  final VoidCallback? onDebugPressed;
-  final VoidCallback? onHelpPressed;
-  final VoidCallback? onSettingsPressed;
-
-  const CustomBottomBar({
-    super.key,
-    this.onDebugPressed,
-    this.onHelpPressed,
-    this.onSettingsPressed,
-  });
+  const CustomBottomBar({super.key});
 
   @override
   State<CustomBottomBar> createState() => _CustomBottomBarState();
@@ -41,6 +32,12 @@ class _CustomBottomBarState extends State<CustomBottomBar> {
       _currentTime = DateFormat('d/M/yyyy HH:mm:ss').format(now);
     });
   }
+
+  final bool debugMode = true;
+  
+  static void _handleDebug() {}
+  static void _handleHelp() {}
+  static void _handleSettings() {}
 
   Widget _buildButton({
     required double width,
@@ -81,7 +78,7 @@ class _CustomBottomBarState extends State<CustomBottomBar> {
       child: Stack(
         children: [
           // Debug Button (left)
-          if (widget.onDebugPressed != null)
+          if (debugMode == true)
             Positioned(
               left: 0,
               top: 0,
@@ -91,7 +88,7 @@ class _CustomBottomBarState extends State<CustomBottomBar> {
                 height: barHeight,
                 icon: Icons.bug_report,
                 label: 'Debug',
-                onPressed: widget.onDebugPressed,
+                onPressed: _handleDebug,
               ),
             ),
           // Help & Settings Buttons (right)
@@ -106,14 +103,14 @@ class _CustomBottomBarState extends State<CustomBottomBar> {
                   height: barHeight,
                   icon: Icons.help,
                   label: 'Help',
-                  onPressed: widget.onHelpPressed,
+                  onPressed: _handleHelp,
                 ),
                 _buildButton(
                   width: buttonWidth,
                   height: barHeight,
                   icon: Icons.settings,
                   label: 'Settings',
-                  onPressed: widget.onSettingsPressed,
+                  onPressed: _handleSettings,
                 ),
               ],
             ),

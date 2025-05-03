@@ -173,17 +173,10 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
-      bottomNavigationBar: const CustomBottomBar(
-        onDebugPressed: _HomePageState._handleDebug,
-        onHelpPressed: _HomePageState._handleHelp,
-        onSettingsPressed: _HomePageState._handleSettings,
-      ),
+      bottomNavigationBar: const CustomBottomBar(),
     );
   }
 
-  static void _handleDebug() {}
-  static void _handleHelp() {}
-  static void _handleSettings() {}
   static void _saveAndLoadGame() {}
   static void _loadGameHistory() {}
   static void _draw() {}
