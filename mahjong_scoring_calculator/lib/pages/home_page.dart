@@ -7,12 +7,17 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(), // Empty container for main content
+      body: Container(),
       bottomNavigationBar: const CustomBottomBar(
+        onDebugPressed: _handleDebug,
         onHelpPressed: _handleHelp,
         onSettingsPressed: _handleSettings,
       ),
     );
+  }
+
+  static void _handleDebug() {
+    // Add debug logic
   }
 
   static void _handleHelp() {
