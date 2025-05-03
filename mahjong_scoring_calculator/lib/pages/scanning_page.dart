@@ -4,14 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-class TileCameraPage extends StatefulWidget {
-  const TileCameraPage({super.key});
+class ScanningPage extends StatefulWidget {
+  const ScanningPage({super.key});
 
   @override
-  State<TileCameraPage> createState() => _TileCameraPageState();
+  State<ScanningPage> createState() => _ScanningPageState();
 }
 
-class _TileCameraPageState extends State<TileCameraPage> {
+class _ScanningPageState extends State<ScanningPage> {
   CameraController? _controller;
   List<CameraDescription>? _cameras;
   bool _isCameraInitialized = false;
@@ -108,26 +108,28 @@ class _TileCameraPageState extends State<TileCameraPage> {
       );
     }
 
-    final size = MediaQuery.of(context).size;
-    final deviceRatio = size.width / size.height;
-    final previewRatio = _controller!.value.aspectRatio;
+    final deviceSize = MediaQuery.of(context).size;
 
     return Scaffold(
       body: Stack(
         children: [
           // Camera preview
-          Transform.scale(
-            scale: previewRatio / deviceRatio,
-            child: Center(
-              child: CameraPreview(_controller!),
+          SizedBox.expand(
+            child: FittedBox(
+              fit: BoxFit.cover,
+              child: SizedBox(
+                width: deviceSize.width,
+                height: deviceSize.height,
+                child: CameraPreview(_controller!),
+              ),
             ),
           ),
 
           // Rectangular overlay guide
           Center(
             child: Container(
-              width: size.width * 0.8,
-              height: size.height * 0.15,
+              width: deviceSize.width * 0.8,
+              height: deviceSize.height * 0.3,
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.yellow, width: 3.0),
                 borderRadius: BorderRadius.circular(8),
@@ -135,26 +137,25 @@ class _TileCameraPageState extends State<TileCameraPage> {
             ),
           ),
 
-          // Camera controls
+          // Return to previous screen button
           Positioned(
-            bottom: 20,
-            left: 0,
-            right: 0,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back,
-                      color: Colors.white, size: 30),
-                  onPressed: () => Navigator.pop(context),
-                ),
-                FloatingActionButton(
-                  backgroundColor: Colors.white,
-                  child: const Icon(Icons.camera_alt, color: Colors.black),
-                  onPressed: _takePicture,
-                ),
-                const SizedBox(width: 56), // Placeholder for balance
-              ],
+            left: 20,
+            top: 20,
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back,
+                color: Colors.grey, size: 30),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ),
+
+          // Camera control
+          Positioned(
+            right: 20,
+            bottom: deviceSize.height * 0.5 - 25,
+            child: FloatingActionButton(
+              backgroundColor: Colors.white,
+              onPressed: _takePicture,
+              child: const Icon(Icons.camera_alt, color: Colors.black),
             ),
           ),
 
@@ -163,13 +164,19 @@ class _TileCameraPageState extends State<TileCameraPage> {
             top: 40,
             left: 0,
             right: 0,
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              color: Colors.black54,
-              child: const Text(
-                'Position tiles inside the rectangle',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.white, fontSize: 16),
+            child: Center(
+              child: Container(
+                width: deviceSize.width * 0.4,
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.black54,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Text(
+                  'Position tiles inside the rectangle',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.white, fontSize: 16),
+                ),
               ),
             ),
           ),

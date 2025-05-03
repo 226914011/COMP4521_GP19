@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
-import 'package:path_provider/path_provider.dart';
 import '../widgets/custom_bottom_bar.dart';
 import '../widgets/mahjong_tile_container.dart';
 import '../widgets/selected_tile_container.dart';
 import '../widgets/custom_button.dart';
-import 'tile_camera_page.dart';
+import 'scanning_page.dart';
 
 class WinningTilePage extends StatefulWidget {
   const WinningTilePage({super.key});
@@ -21,6 +20,21 @@ class _WinningTilePageState extends State<WinningTilePage> {
     if (_selectedTiles.length < 18) {
       setState(() => _selectedTiles.add(tile));
     }
+  }
+
+  void _addTilesByCamera() {
+    _clearTiles();
+    // Placeholder for camera functionality
+    _addTile('wind-east');
+    _addTile('wind-south');
+    _addTile('wind-west');
+    _addTile('wind-north');
+    _addTile('bamboo1');
+    _addTile('bamboo2');
+    _addTile('bamboo3');
+    _addTile('man1');
+    _addTile('man2');
+    _addTile('man3');
   }
 
   void _removeTile(int index) {
@@ -76,15 +90,14 @@ class _WinningTilePageState extends State<WinningTilePage> {
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) =>
-                                        const TileCameraPage(),
+                                        const ScanningPage(),
                                   ),
                                 );
 
                                 if (imagePath != null) {
                                   // Handle the captured image
                                   // For now, let's just add a placeholder tile to indicate a photo was taken
-                                  _addTile(
-                                      'camera'); // You may want to replace this with actual image processing
+                                  _addTilesByCamera(); // You may want to replace this with actual image processing
 
                                   // Show a small preview of the captured image
                                   ScaffoldMessenger.of(context).showSnackBar(

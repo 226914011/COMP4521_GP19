@@ -1,6 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'pages/main_page.dart';
+import 'pages/scanning_page.dart';
 import 'pages/winning_tile_page.dart';
 
 void main() {
@@ -28,6 +29,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/main': (context) => const MainPage(),
         '/winning_tile': (context) => const WinningTilePage(),
+        '/scanning': (context) => const ScanningPage(),
       }
     );
   }
