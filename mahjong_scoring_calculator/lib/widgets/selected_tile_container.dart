@@ -17,7 +17,7 @@ class SelectedTileContainer extends StatelessWidget {
     final containerWidth = deviceSize.width * 0.8;
     final tileWidth = containerWidth / 18;
 
-    return Container(
+    return SizedBox(
       width: containerWidth,
       height: deviceSize.height * 0.15,
       child: Row(
