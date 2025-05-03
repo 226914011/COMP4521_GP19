@@ -1,0 +1,2 @@
+D:/Homework/COMP4521/project/mahjong_scoring_calculator/android/app/.cxx/Debug/22j404s6/x86/CMakeFiles/edit_cache.dir
+D:/Homework/COMP4521/project/mahjong_scoring_calculator/android/app/.cxx/Debug/22j404s6/x86/CMakeFiles/rebuild_cache.dir
