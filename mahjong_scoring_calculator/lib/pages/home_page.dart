@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/custom_bottom_bar.dart';
+import '../widgets/player_container.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -7,7 +8,9 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(),
+      body: const Center(
+        child: PlayerContainer(),
+      ),
       bottomNavigationBar: const CustomBottomBar(
         onDebugPressed: _handleDebug,
         onHelpPressed: _handleHelp,

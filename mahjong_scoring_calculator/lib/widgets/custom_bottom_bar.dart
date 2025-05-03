@@ -68,10 +68,9 @@ class _CustomBottomBarState extends State<CustomBottomBar> {
 
   @override
   Widget build(BuildContext context) {
-    final deviceHeight = MediaQuery.of(context).size.height;
-    final deviceWidth = MediaQuery.of(context).size.width;
-    final barHeight = deviceHeight * 0.1333;
-    final buttonWidth = deviceWidth * 0.125;
+    final deviceSize = MediaQuery.of(context).size;
+    final barHeight = deviceSize.height * 0.1333;
+    final buttonWidth = deviceSize.width * 0.125;
 
     return Container(
       height: barHeight,
