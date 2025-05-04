@@ -3,10 +3,12 @@ import 'mahjong_icon_button.dart';
 
 class SelectedTileContainer extends StatelessWidget {
   final List<String> selectedTiles;
+  final int? tileCount;
   final Function(int) onRemove;
 
   const SelectedTileContainer({
     super.key,
+    this.tileCount,
     required this.selectedTiles,
     required this.onRemove,
   });
@@ -15,13 +17,13 @@ class SelectedTileContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     final deviceSize = MediaQuery.of(context).size;
     final containerWidth = deviceSize.width * 0.8;
-    final tileWidth = containerWidth / 18;
+    final tileWidth = containerWidth / (tileCount ?? 14);
 
     return SizedBox(
       width: containerWidth,
       height: deviceSize.height * 0.15,
       child: Row(
-        children: List.generate(18, (index) {
+        children: List.generate((tileCount ?? 14), (index) {
           final hasTile = index < selectedTiles.length;
           return SizedBox(
             width: tileWidth,

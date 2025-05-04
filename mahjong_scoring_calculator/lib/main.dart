@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'pages/main_page.dart';
 import 'pages/scanning_page.dart';
 import 'pages/winning_tile_page.dart';
+import 'pages/test_page.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,12 +25,13 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MainPage(),
+      home: const TestPage(),
       debugShowCheckedModeBanner: false,
       routes: {
         '/main': (context) => const MainPage(),
         '/winning_tile': (context) => const WinningTilePage(),
         '/scanning': (context) => const ScanningPage(),
+        '/test': (context) => const TestPage(),
       }
     );
   }

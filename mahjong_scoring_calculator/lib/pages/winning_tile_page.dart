@@ -14,10 +14,11 @@ class WinningTilePage extends StatefulWidget {
 }
 
 class _WinningTilePageState extends State<WinningTilePage> {
+  final int _maxTiles = 14;
   final List<String> _selectedTiles = [];
 
   void _addTile(String tile) {
-    if (_selectedTiles.length < 18) {
+    if (_selectedTiles.length < _maxTiles) {
       setState(() => _selectedTiles.add(tile));
     }
   }
@@ -57,6 +58,7 @@ class _WinningTilePageState extends State<WinningTilePage> {
         child: Column(
           children: [
             SelectedTileContainer(
+              tileCount: _maxTiles,
               selectedTiles: _selectedTiles,
               onRemove: _removeTile,
             ),
