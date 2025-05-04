@@ -5,67 +5,105 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 
-Future<void> testRoboflowAPI(File imagePath) async {
+Future<Map<String, dynamic>> testRoboflowAPI(File imagePath) async {
   try {
     final bytes = imagePath.readAsBytesSync();
-    
+
     final imageList = bytes.buffer.asUint8List();
     String base64Image = "";
-    if(imageList.isNotEmpty) {
+    if (imageList.isNotEmpty) {
       base64Image = base64Encode(imageList);
     } else {
       if (kDebugMode) {
         print("no image list found");
       }
+      return {"error": "No image data found"};
     }
 
+    const apiKey = "3xxccwZJ583VW1srMge4";
     final url =
-        "https://serverless.roboflow.com/master-oez61/7?api_key=3xxccwZJ583VW1srMge4";
+        "https://serverless.roboflow.com/master-oez61/7?api_key=$apiKey";
+
+    // Based on the Node.js example
     final headers = {'Content-Type': 'application/x-www-form-urlencoded'};
 
-    final body = {
-      "data": base64Image,
-    };
-
-    final encodedBody = Uri(queryParameters: body).query;
     final response = await http.post(
       Uri.parse(url),
       headers: headers,
-      body: encodedBody,
+      body: base64Image, // Send raw base64 string directly
     );
 
     if (response.statusCode == 200 || response.statusCode == 201) {
       if (kDebugMode) {
         print('Success: ${response.body}');
       }
+      return jsonDecode(response.body);
     } else {
       if (kDebugMode) {
-        print('Error: Status Code ${response.statusCode}, Response: ${response.body}');
+        print(
+            'Error: Status Code ${response.statusCode}, Response: ${response.body}');
       }
+      return {
+        "error": "API Error: ${response.statusCode}",
+        "message": response.body
+      };
     }
   } catch (e) {
     if (kDebugMode) {
       print('Exception: ${e.toString()}');
     }
+    return {"error": e.toString()};
   }
 }
 
-Future<String> testAPI() async {
+Future<Map<String, dynamic>> testAPI() async {
   try {
     // Directly load asset without temporary file
     final ByteData data = await rootBundle.load('assets/test/test_yolo_1.png');
     final Uint8List bytes = data.buffer.asUint8List();
     final base64Image = base64Encode(bytes);
-    
-    const url = "https://serverless.roboflow.com/master-oez61/7?api_key=3xxccwZJ583VW1srMge4";
+
+    const apiKey = "3xxccwZJ583VW1srMge4";
+    final url =
+        "https://serverless.roboflow.com/master-oez61/7?api_key=$apiKey";
+
+    // Use the same approach as the Node.js example
     final response = await http.post(
       Uri.parse(url),
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-      body: {'data': base64Image},
+      body: base64Image, // Send raw base64 string directly
     );
 
-    return response.body;
+    return jsonDecode(response.body);
   } catch (e) {
-    return 'Error: ${e.toString()}';
+    return {"error": e.toString()};
+  }
+}
+
+// Add a new method to support URL-based inference (like the second Node.js example)
+Future<Map<String, dynamic>> testAPIWithImageURL(String imageUrl) async {
+  try {
+    const apiKey = "3xxccwZJ583VW1srMge4";
+
+    // Create URL with query parameters for both API key and image URL
+    final url = Uri.parse("https://serverless.roboflow.com/master-oez61/7")
+        .replace(queryParameters: {
+      'api_key': apiKey,
+      'image': imageUrl,
+    });
+
+    // No body needed in this case, just a GET request
+    final response = await http.post(url);
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return jsonDecode(response.body);
+    } else {
+      return {
+        "error": "API Error: ${response.statusCode}",
+        "message": response.body
+      };
+    }
+  } catch (e) {
+    return {"error": e.toString()};
   }
 }

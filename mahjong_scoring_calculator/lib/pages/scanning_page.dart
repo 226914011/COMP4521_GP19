@@ -142,8 +142,7 @@ class _ScanningPageState extends State<ScanningPage> {
             left: 20,
             top: 20,
             child: IconButton(
-              icon: const Icon(Icons.arrow_back,
-                color: Colors.grey, size: 30),
+              icon: const Icon(Icons.arrow_back, color: Colors.grey, size: 30),
               onPressed: () => Navigator.pop(context),
             ),
           ),

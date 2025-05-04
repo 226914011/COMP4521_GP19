@@ -22,7 +22,7 @@ class _TestPageState extends State<TestPage> {
 
     try {
       final result = await testAPI();
-      setState(() => _response = _formatJson(result));
+      setState(() => _response = _formatJson(jsonEncode(result)));
     } catch (e) {
       setState(() => _response = 'Error: ${e.toString()}');
     } finally {
@@ -49,8 +49,8 @@ class _TestPageState extends State<TestPage> {
         child: Column(
           children: [
             ElevatedButton(
-              onPressed: _isLoading ? null : _runTest,
-              child: const Text('Run API Test')),
+                onPressed: _isLoading ? null : _runTest,
+                child: const Text('Run API Test')),
             const SizedBox(height: 20),
             Expanded(
               child: Container(
@@ -65,8 +65,8 @@ class _TestPageState extends State<TestPage> {
                     _response,
                     style: TextStyle(
                       fontFamily: 'monospace',
-                      color: _response.startsWith('Error:') 
-                          ? Colors.red 
+                      color: _response.startsWith('Error:')
+                          ? Colors.red
                           : Colors.black,
                     ),
                   ),
