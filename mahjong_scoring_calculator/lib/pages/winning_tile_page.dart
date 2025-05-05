@@ -4,6 +4,7 @@ import '../widgets/custom_bottom_bar.dart';
 import '../widgets/mahjong_tile_container.dart';
 import '../widgets/selected_tile_container.dart';
 import '../widgets/custom_button.dart';
+import '../yolo/model.dart';
 import 'scanning_page.dart';
 
 class WinningTilePage extends StatefulWidget {
@@ -16,6 +17,7 @@ class WinningTilePage extends StatefulWidget {
 class _WinningTilePageState extends State<WinningTilePage> {
   final int _maxTiles = 14;
   final List<String> _selectedTiles = [];
+  bool _isLoading = false;
 
   void _addTile(String tile) {
     if (_selectedTiles.length < _maxTiles) {
@@ -23,19 +25,13 @@ class _WinningTilePageState extends State<WinningTilePage> {
     }
   }
 
-  void _addTilesByCamera() {
+  void _addTilesByCamera(List<String> tiles) {
     _clearTiles();
-    // Placeholder for camera functionality
-    _addTile('wind-east');
-    _addTile('wind-south');
-    _addTile('wind-west');
-    _addTile('wind-north');
-    _addTile('bamboo1');
-    _addTile('bamboo2');
-    _addTile('bamboo3');
-    _addTile('man1');
-    _addTile('man2');
-    _addTile('man3');
+    for (var tile in tiles) {
+      if (_selectedTiles.length < _maxTiles) {
+        _addTile(tile);
+      }
+    }
   }
 
   void _removeTile(int index) {
@@ -60,7 +56,11 @@ class _WinningTilePageState extends State<WinningTilePage> {
             SelectedTileContainer(
               tileCount: _maxTiles,
               selectedTiles: _selectedTiles,
-              onRemove: _removeTile,
+              onRemove: (index) {
+                if (!_isLoading) {
+                  _removeTile(index);
+                }
+              },
             ),
             Expanded(
               child: Row(
@@ -70,7 +70,11 @@ class _WinningTilePageState extends State<WinningTilePage> {
                     width: mahjongContainerWidth,
                     child: MahjongTileContainer(
                       width: mahjongContainerWidth,
-                      onTileSelected: _addTile,
+                      onTileSelected: (tile) {
+                        if (!_isLoading) {
+                          _addTile(tile);
+                        }
+                      },
                     ),
                   ),
                   SizedBox(
@@ -87,39 +91,37 @@ class _WinningTilePageState extends State<WinningTilePage> {
                             ),
                             IconButton(
                               icon: const Icon(Icons.camera_alt),
-                              onPressed: () async {
+                              onPressed: _isLoading ? null : () async {
                                 final imagePath = await Navigator.push<String>(
                                   context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        const ScanningPage(),
-                                  ),
+                                  MaterialPageRoute(builder: (context) => const ScanningPage()),
                                 );
 
                                 if (imagePath != null) {
-                                  // Handle the captured image
-                                  // For now, let's just add a placeholder tile to indicate a photo was taken
-                                  _addTilesByCamera(); // You may want to replace this with actual image processing
-
-                                  // Show a small preview of the captured image
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Row(
-                                        children: [
-                                          Image.file(
-                                            File(imagePath),
-                                            height: 40,
-                                            width: 40,
-                                            fit: BoxFit.cover,
-                                          ),
-                                          const SizedBox(width: 10),
-                                          const Text(
-                                              'Image captured successfully'),
-                                        ],
+                                  setState(() => _isLoading = true);
+                                  try {
+                                    final apiResult = await extractTilesFromImage(File(imagePath));
+                                    final processedTiles = processPredictions(apiResult['predictions']);
+                                    _addTilesByCamera(processedTiles);
+                                    
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Row(
+                                          children: [
+                                            Image.file(File(imagePath), height: 40, width: 40),
+                                            const SizedBox(width: 10),
+                                            Text('Added ${processedTiles.length} tiles from scan'),
+                                          ],
+                                        ),
                                       ),
-                                      duration: const Duration(seconds: 3),
-                                    ),
-                                  );
+                                    );
+                                  } catch (e) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Error: ${e.toString()}')),
+                                    );
+                                  } finally {
+                                    setState(() => _isLoading = false);
+                                  }
                                 }
                               },
                             ),

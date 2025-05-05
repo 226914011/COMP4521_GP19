@@ -1,0 +1,1 @@
+enum SeatPosition { east, south, west, north }

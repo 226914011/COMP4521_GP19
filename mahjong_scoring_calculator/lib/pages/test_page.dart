@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import '../yolo/model.dart';
+import 'scanning_page.dart';
 
 class TestPage extends StatefulWidget {
   const TestPage({super.key});
@@ -30,6 +32,29 @@ class _TestPageState extends State<TestPage> {
     }
   }
 
+  Future<void> _runCameraTest() async {
+    final imagePath = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const ScanningPage()),
+    );
+
+    if (imagePath == null) return;
+
+    setState(() {
+      _isLoading = true;
+      _response = 'Testing...';
+    });
+
+    try {
+      final result = await extractTilesFromImage(File(imagePath));
+      setState(() => _response = _formatJson(jsonEncode(result)));
+    } catch (e) {
+      setState(() => _response = 'Error: ${e.toString()}');
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
   String _formatJson(String jsonString) {
     try {
       final parsed = json.decode(jsonString);
@@ -48,9 +73,19 @@ class _TestPageState extends State<TestPage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            ElevatedButton(
-                onPressed: _isLoading ? null : _runTest,
-                child: const Text('Run API Test')),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: _isLoading ? null : _runTest,
+                  child: const Text('Run API Test'),
+                ),
+                ElevatedButton(
+                  onPressed: _isLoading ? null : _runCameraTest,
+                  child: const Text('Test API with Camera'),
+                ),
+              ],
+            ),
             const SizedBox(height: 20),
             Expanded(
               child: Container(

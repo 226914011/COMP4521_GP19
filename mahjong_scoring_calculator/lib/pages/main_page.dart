@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
-import 'dart:convert'; // Import for jsonEncode
+import 'dart:convert';
 
-// Import your widgets and the new handler/service
 import '../widgets/custom_bottom_bar.dart';
 import '../widgets/player_container.dart';
 import '../widgets/custom_button.dart';
-import 'winning_tile_page.dart'; 
-import '../utils/api_test_handler.dart'; 
+import 'scanning_page.dart';
+import 'test_page.dart';
+import 'winning_tile_page.dart';
+import '../utils/api_test_handler.dart';
+
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
 
@@ -15,7 +17,6 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  // --- Existing Game State ---
   bool gameStarted = false;
   final List<bool> hasPlayers = [false, false, false, false];
   final playerNames = ['', '', '', '']; 
@@ -135,6 +136,30 @@ class _MainPageState extends State<MainPage> {
   Widget _buildGridCell(Widget child) {
     return Expanded(
       child: Center(child: child),
+    );
+  }
+
+  void _showDebugMenu() {
+    showDialog(
+      context: context,
+      builder: (context) => SimpleDialog(
+        title: const Text('Debug Menu'),
+        children: [
+          _buildDebugOption('Winning Tiles Page', const WinningTilePage()),
+          _buildDebugOption('Scanning Page', const ScanningPage()),
+          _buildDebugOption('API Test Page', const TestPage()),
+        ],
+      ),
+    );
+  }
+
+  ListTile _buildDebugOption(String title, Widget page) {
+    return ListTile(
+      title: Text(title),
+      onTap: () {
+        Navigator.pop(context); // Close the dialog
+        Navigator.push(context, MaterialPageRoute(builder: (_) => page));
+      },
     );
   }
 
@@ -282,15 +307,8 @@ class _MainPageState extends State<MainPage> {
           ],
         ),
       ),
-      // Your existing bottom navigation bar
       bottomNavigationBar: CustomBottomBar(
-          onDebugPressed: () {
-             print("Debug button pressed, navigating..."); // Or remove if not needed
-             Navigator.push(
-               context,
-               MaterialPageRoute(builder: (context) => const WinningTilePage()),
-             );
-          }
+          onDebugPressed: _showDebugMenu,
       ),
     );
   }
