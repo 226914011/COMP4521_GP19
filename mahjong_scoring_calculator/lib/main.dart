@@ -1,12 +1,23 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
+import 'database/database_helper.dart';
 import 'pages/main_page.dart';
 import 'pages/scanning_page.dart';
 import 'pages/winning_tile_page.dart';
 import 'pages/test_page.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize database
+  try {
+    final dbHelper = DatabaseHelper.instance;
+    await dbHelper.database; // Trigger database creation
+  } catch (e) {
+    print('Database initialization failed: $e');
+  }
+
+
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.landscapeLeft,

@@ -10,8 +10,8 @@ class PlayerContainer extends StatelessWidget {
 
   const PlayerContainer({
     super.key,
-    this.playerName = 'Frankie',
-    this.playerScore = 4521,
+    this.playerName = '',
+    this.playerScore = 0,
     required this.hasPlayer,
     required this.gameStarted,
     required this.onAdd,

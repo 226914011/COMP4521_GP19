@@ -123,6 +123,15 @@ class DatabaseHelper {
     return await db.insert('User', user.toMap());
   }
 
+  Future<int> deleteUser(int userId) async {
+    final db = await instance.database;
+    return await db.delete(
+      'User',
+      where: 'user_id = ?',
+      whereArgs: [userId],
+    );
+  }
+
   Future<List<User>> getAllUsers() async {
     final db = await instance.database;
     final maps = await db.query('User');
