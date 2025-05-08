@@ -19,7 +19,7 @@ class MahjongMeld {
 
 class MahjongApiService {
   // Adjust if your backend runs elsewhere or on a different port
-  final String _baseUrl = 'http://localhost:3000';
+  final String _baseUrl = 'http://localhost:5001/hk-mahjong-36eb0/us-central1/api'; //hk-mahjong-36eb0
 
   // Method for pre-defined melds (/calculate endpoint)
   Future<Map<String, dynamic>> calculateFaan(
