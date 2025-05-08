@@ -64,17 +64,35 @@ Future<Map<String, dynamic>> testAPI() async {
     final base64Image = base64Encode(bytes);
 
     const apiKey = "3xxccwZJ583VW1srMge4";
+    //final url =
+    //    "https://serverless.roboflow.com/master-oez61/7?api_key=$apiKey";
     final url =
-        "https://serverless.roboflow.com/master-oez61/7?api_key=$apiKey";
+        "https://serverless.roboflow.com/infer/workflows/mobile-project/detect-count-and-visualize";
 
     // Use the same approach as the Node.js example
     final response = await http.post(
       Uri.parse(url),
-      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-      body: base64Image, // Send raw base64 string directly
+      //headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        "api_key": apiKey,
+        "inputs": {
+          "image": {
+            "type": "base64",
+            "value": base64Image,
+          }
+        }
+      }),
     );
 
-    return jsonDecode(response.body);
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return jsonDecode(response.body);
+    } else {
+      return {
+        "error": "API Error: ${response.statusCode}",
+        "message": response.body
+      };
+    }
   } catch (e) {
     return {"error": e.toString()};
   }
@@ -110,7 +128,9 @@ Future<Map<String, dynamic>> testAPIWithImageURL(String imageUrl) async {
 
 List<String> processPredictions(List<dynamic> predictions) {
   // Filter invalid classes
-  final valid = predictions.where((p) => !['0m', '0p', '0s', '0b'].contains(p['class'])).toList();
+  final valid = predictions
+      .where((p) => !['0m', '0p', '0s', '0b'].contains(p['class']))
+      .toList();
 
   // Sort by confidence
   valid.sort((a, b) => b['confidence'].compareTo(a['confidence']));
@@ -135,7 +155,8 @@ List<String> processPredictions(List<dynamic> predictions) {
       case 's':
         return 'bamboo$number';
       case 'z':
-        if (number <= 4) return 'wind-${['east', 'south', 'west', 'north'][number - 1]}';
+        if (number <= 4)
+          return 'wind-${['east', 'south', 'west', 'north'][number - 1]}';
         return 'dragon-${['haku', 'green', 'chun'][number - 5]}';
       default:
         return 'unknown';
