@@ -18,10 +18,7 @@ const {
 const app = express();
 
 // Middleware (same as in server.js)
-// It's crucial to enable CORS for requests from your Flutter Web app.
-// For production, you might want to restrict the origin:
-// app.use(cors({ origin: 'https://your-flutter-app-domain.com' }));
-app.use(cors({origin: true})); // Allows all origins - good for development
+app.use(cors({credentials: true, origin: true})); // Allows all origins
 app.use(express.json());
 
 // === Endpoint for Pre-defined Melds (copied from server.js) ===
