@@ -10,6 +10,8 @@ import 'scanning_page.dart';
 import 'test_page.dart';
 import 'winning_tile_page.dart';
 import '../utils/api_test_handler.dart';
+import '../database/database_helper.dart';
+import '../enum/seat_position.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -464,8 +466,94 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-  void _saveAndLoadGame() {
-    // Your save game implementation
+  Future<void> _saveAndLoadGame() async {
+    // Only allow saving if a game is in progress
+    if (!gameStarted) {
+      _showSnackbar('No active game to save', Colors.orange);
+      return;
+    }
+
+    // Check if all players are set
+    if (!hasPlayers.every((hasPlayer) => hasPlayer)) {
+      _showSnackbar(
+          'Cannot save: All player positions must be filled', Colors.red);
+      return;
+    }
+
+    try {
+      final dbHelper = DatabaseHelper.instance;
+
+      // 1. Create a new match record
+      final now = DateTime.now();
+      final matchId = await dbHelper.insertMatch(
+        startTime: now,
+        // Leave endTime null since game is in progress
+      );
+
+      // 2. Add all players as match participants
+      for (int i = 0; i < playerIds.length; i++) {
+        // Skip if player ID is not valid
+        if (playerIds[i] == -1) continue;
+
+        // Get the seat position for this player index
+        final seatPosition = getSeatWind(i);
+
+        await dbHelper.insertParticipant(
+          userId: playerIds[i],
+          matchId: matchId,
+          seatPosition: _seatPositionFromString(seatPosition),
+          isDealer: i == dealerPosition, // Set dealer flag
+        );
+      }
+
+      // 3. Save current game state (points, etc.)
+      // Convert scores array to string for storage
+      final pointsString = jsonEncode(scores);
+
+      // Create an array to track who won the current game
+      final List<bool> winners = List.filled(4, false);
+
+      await dbHelper.insertGame(
+        matchId: matchId,
+        points: scores,
+        isWinner: winners, // No winner for saved game in progress
+        // Optional: Include other game state if needed
+      );
+
+      // Show success message
+      _showSnackbar(
+          'Game saved successfully! Match ID: $matchId', Colors.green);
+
+      // Optional: Offer to continue or start a new game
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Game Saved'),
+            content: Text(
+                'Your game has been saved with Match ID: $matchId. You can load it later from the history.'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text('Continue Playing'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  _resetGame(); // Reset for a new game
+                },
+                child: const Text('Start New Game'),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      // Handle database errors
+      _showSnackbar('Error saving game: ${e.toString()}', Colors.red);
+    }
   }
 
   void _loadGameHistory() {
@@ -573,5 +661,13 @@ class _MainPageState extends State<MainPage> {
     // (dealer + playerPosition) % 4 gives the absolute position
     // winds[(4 + playerPosition - dealerPosition) % 4] gives the wind relative to dealer
     return winds[(4 + playerPosition - dealerPosition) % 4];
+  }
+
+  // Add this helper method to convert string to SeatPosition enum
+  SeatPosition _seatPositionFromString(String value) {
+    return SeatPosition.values.firstWhere(
+      (position) => position.name.toLowerCase() == value.toLowerCase(),
+      orElse: () => SeatPosition.east, // Default to east if not found
+    );
   }
 }
