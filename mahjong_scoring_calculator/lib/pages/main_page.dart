@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
+import 'dart:math'; // Add this import for Random
 
 import '../widgets/custom_bottom_bar.dart';
 import '../widgets/player_container.dart';
@@ -44,7 +45,14 @@ class _MainPageState extends State<MainPage> {
   // --- Existing Game Logic Methods ---
   void _checkStartGame() {
     if (hasPlayers.every((player) => player)) {
-      setState(() => gameStarted = true);
+      setState(() {
+        gameStarted = true;
+        // Randomly select initial dealer position (0-3)
+        dealerPosition = Random().nextInt(4);
+        currentWindIndex = 0; // Start with East wind
+        handsPlayedInRound = 1;
+        isNewRound = true;
+      });
     } else {
       showDialog(
         context: context,
@@ -65,7 +73,9 @@ class _MainPageState extends State<MainPage> {
   void _resetGame() {
     setState(() {
       gameStarted = false;
-      playerIds.asMap().forEach((index, id) => _resetPlayer(index)); // Reset all players
+      playerIds
+          .asMap()
+          .forEach((index, id) => _resetPlayer(index)); // Reset all players
       // Clear API test results on game reset
       _meldApiResult = null;
       _meldApiError = null;
@@ -188,7 +198,8 @@ class _MainPageState extends State<MainPage> {
       builder: (context) => SimpleDialog(
         title: const Text('Debug Menu'),
         children: [
-          _buildDebugOption('Winning Tiles Page', const WinningTilePage()),
+          _buildDebugOption(
+              'Winning Tiles Page', WinningTilePage(playerNames: playerNames)),
           _buildDebugOption('Scanning Page', const ScanningPage()),
           _buildDebugOption('API Test Page', const TestPage()),
         ],
@@ -203,6 +214,35 @@ class _MainPageState extends State<MainPage> {
         Navigator.pop(context); // Close the dialog
         Navigator.push(context, MaterialPageRoute(builder: (_) => page));
       },
+    );
+  }
+
+  // Add these variables to your _MainPageState class
+  int dealerPosition = 0; // 0 = East player, 1 = South, etc.
+  int handsPlayedInRound = 1;
+  bool isNewRound = true;
+
+  // Update the wind indicator to show actual wind
+  Widget _buildWindIndicator() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.amber[100],
+        borderRadius: BorderRadius.circular(30),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text('Prevailing wind: ${winds[currentWindIndex]}',
+              style: const TextStyle(fontSize: 16)),
+          const SizedBox(height: 8),
+          Text('Dealer: ${playerNames[dealerPosition]}',
+              style:
+                  const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+          Text('Hands in round: $handsPlayedInRound/4',
+              style: const TextStyle(fontSize: 12)),
+        ],
+      ),
     );
   }
 
@@ -359,17 +399,7 @@ class _MainPageState extends State<MainPage> {
                   // (1,1)
                   _buildGridCell(
                     gameStarted
-                        ? Container(
-                            /* Wind Indicator */ padding:
-                                const EdgeInsets.symmetric(
-                                    horizontal: 24, vertical: 12),
-                            decoration: BoxDecoration(
-                              color: Colors.amber[100],
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                            child: const Text('Prevalent wind: East',
-                                style: TextStyle(fontSize: 16)),
-                          )
+                        ? _buildWindIndicator()
                         : CustomButton(
                             text: 'Start Game',
                             width: deviceSize.width * 0.2,
@@ -434,8 +464,114 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-  static void _saveAndLoadGame() {}
-  static void _loadGameHistory() {}
-  static void _draw() {}
-  static void _win() {}
+  void _saveAndLoadGame() {
+    // Your save game implementation
+  }
+
+  void _loadGameHistory() {
+    // Your load game implementation
+  }
+
+  void _draw() {
+    setState(() {
+      // Store the current dealer's name before rotation
+      final currentDealerName = playerNames[dealerPosition];
+
+      // Rotate the dealership after a draw
+      _rotateDealership();
+
+      // Show dialog confirming the draw and dealer change
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Round Ended in Draw'),
+          content: Text(
+              'The round has ended in a draw. Dealer changes from $currentDealerName to ${playerNames[dealerPosition]}.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+
+      // Show dealer change notification
+      _showSnackbar("Draw - Dealer changed to ${playerNames[dealerPosition]}",
+          Colors.blue);
+    });
+  }
+
+  void _win() {
+    // Navigate to the winning tile page
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => WinningTilePage(playerNames: playerNames),
+      ),
+    ).then((result) {
+      // Handle the result when returning from the winning tile page
+      if (result != null && result is Map<String, dynamic>) {
+        setState(() {
+          // Update scores based on win result
+          if (result.containsKey('winnerIndex') &&
+              result.containsKey('points')) {
+            final winnerIndex = result['winnerIndex'] as int;
+            final points = result['points'] as int;
+
+            // Update winner's score
+            scores[winnerIndex] += points;
+
+            // Update other players' scores (losers pay points)
+            for (int i = 0; i < scores.length; i++) {
+              if (i != winnerIndex) {
+                // Basic implementation - each player pays equal amount
+                scores[i] -= (points ~/ 3);
+              }
+            }
+
+            // If current dealer won, they keep the dealership (no rotation)
+            // Otherwise, rotate the dealership
+            if (winnerIndex != dealerPosition) {
+              _rotateDealership();
+            } else {
+              // Dealer won - show a message
+              _showSnackbar("${playerNames[dealerPosition]} keeps dealership",
+                  Colors.green);
+            }
+          }
+        });
+      }
+    });
+  }
+
+  // Add this method to handle dealer rotation
+  void _rotateDealership() {
+    setState(() {
+      // Rotate dealer position counter-clockwise
+      dealerPosition = (dealerPosition + 1) % 4;
+      handsPlayedInRound++;
+
+      // Check if we've completed a round (all players have been dealer)
+      if (handsPlayedInRound >= 4) {
+        handsPlayedInRound = 0;
+        currentWindIndex = (currentWindIndex + 1) % winds.length;
+        isNewRound = true;
+
+        // Show message for new round
+        _showSnackbar(
+            "New round: ${winds[currentWindIndex]} wind", Colors.amber);
+      }
+    });
+  }
+
+  // Add this helper method to calculate seat wind for a player
+  String getSeatWind(int playerPosition) {
+    // Calculate relative position from dealer
+    // (dealer + playerPosition) % 4 gives the absolute position
+    // winds[(4 + playerPosition - dealerPosition) % 4] gives the wind relative to dealer
+    return winds[(4 + playerPosition - dealerPosition) % 4];
+  }
 }

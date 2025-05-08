@@ -17,7 +17,6 @@ void main() async {
     print('Database initialization failed: $e');
   }
 
-
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.landscapeLeft,
@@ -32,18 +31,21 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Mahjong Scoring Calculator',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const MainPage(),
-      debugShowCheckedModeBanner: false,
-      routes: {
-        '/main': (context) => const MainPage(),
-        '/winning_tile': (context) => const WinningTilePage(),
-        '/scanning': (context) => const ScanningPage(),
-        '/test': (context) => const TestPage(),
-      }
-    );
+        title: 'Mahjong Scoring Calculator',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        home: const MainPage(),
+        debugShowCheckedModeBanner: false,
+        routes: {
+          '/main': (context) => const MainPage(),
+          '/winning_tile': (context) => WinningTilePage(
+                playerNames: ModalRoute.of(context)!.settings.arguments
+                        as List<String>? ??
+                    ['Player 1', 'Player 2', 'Player 3', 'Player 4'],
+              ),
+          '/scanning': (context) => const ScanningPage(),
+          '/test': (context) => const TestPage(),
+        });
   }
 }
