@@ -236,70 +236,62 @@ class _WinningTilePageState extends State<WinningTilePage> {
   Widget _buildPlayerSelectionUI() {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
       decoration: BoxDecoration(
         color: Colors.grey[200],
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      height: MediaQuery.of(context).size.height * 0.12,
+      width: MediaQuery.of(context).size.width * 0.8,
+      child: Row(
         children: [
-          const Text(
-            'Select Winner and Losers:',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          const Text('Winner:',
+              style: TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(width: 8),
+          // Dropdown with player names instead of wind directions
+          DropdownButton<int>(
+            value: _selectedWinnerIndex,
+            items: List.generate(
+              widget.playerNames.length,
+              (index) => DropdownMenuItem(
+                  value: index, child: Text(widget.playerNames[index])),
+            ),
+            onChanged: (value) {
+              if (value != null) {
+                setState(() {
+                  _selectedWinnerIndex = value;
+                  _updateLosers(value); // Update losers when winner changes
+                });
+              }
+            },
           ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              const Text('Winner:',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(width: 8),
-              // Dropdown with player names instead of wind directions
-              DropdownButton<int>(
-                value: _selectedWinnerIndex,
-                items: List.generate(
-                  widget.playerNames.length,
-                  (index) => DropdownMenuItem(
-                      value: index, child: Text(widget.playerNames[index])),
-                ),
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() {
-                      _selectedWinnerIndex = value;
-                      _updateLosers(value); // Update losers when winner changes
-                    });
-                  }
-                },
-              ),
-              const Spacer(),
-              const Text('Losers:',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(width: 8),
-              // Checkboxes with player initials or names
-              for (int i = 0; i < widget.playerNames.length; i++)
-                Padding(
-                  padding: const EdgeInsets.only(right: 8.0),
-                  child: Row(
-                    children: [
-                      Checkbox(
-                        value: _selectedLosers[i],
-                        onChanged: _selectedWinnerIndex == i
-                            ? null // Disable if this is the winner
-                            : (value) {
-                                setState(() {
-                                  _selectedLosers[i] = value!;
-                                });
-                              },
-                      ),
-                      Text(widget.playerNames[i].isNotEmpty
-                          ? widget.playerNames[i]
-                              .substring(0, 1) // First initial
-                          : '$i'), // Fallback to index if name is empty
-                    ],
+          const Spacer(),
+          const Text('Losers:',
+              style: TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(width: 8),
+          // Checkboxes with player initials or names
+          for (int i = 0; i < widget.playerNames.length; i++)
+            Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: Row(
+                children: [
+                  Checkbox(
+                    value: _selectedLosers[i],
+                    onChanged: _selectedWinnerIndex == i
+                        ? null // Disable if this is the winner
+                        : (value) {
+                            setState(() {
+                              _selectedLosers[i] = value!;
+                            });
+                          },
                   ),
-                ),
-            ],
-          ),
+                  Text(widget.playerNames[i].isNotEmpty
+                      ? widget.playerNames[i]
+                          .substring(0, 1) // First initial
+                      : '$i'), // Fallback to index if name is empty
+                ],
+              ),
+            ),
         ],
       ),
     );
