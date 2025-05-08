@@ -101,7 +101,7 @@ class DatabaseHelper {
       {'fan_name': 'All Honors', 'fan_value': 32},
       {'fan_name': 'Seven Pairs', 'fan_value': 24},
     ];
-    
+
     for (final fan in fans) {
       await db.insert('Fans', fan);
     }
@@ -202,6 +202,43 @@ class DatabaseHelper {
     final db = await instance.database;
     final maps = await db.query('Tiles');
     return maps.map((map) => Tile.fromMap(map)).toList();
+  }
+
+  // Get all matches from database
+  Future<List<Map<String, dynamic>>> getAllMatches() async {
+    final db = await instance.database;
+    // Get all matches, ordered by start time (most recent first)
+    return await db.query(
+      'Match',
+      orderBy: 'start_time DESC',
+    );
+  }
+
+  // Get participants for a specific match
+  Future<List<Map<String, dynamic>>> getParticipantsByMatchId(
+      int matchId) async {
+    final db = await instance.database;
+    // Join Match_Participant with User to get usernames
+    final result = await db.rawQuery('''
+      SELECT mp.*, u.username 
+      FROM Match_Participant mp
+      JOIN User u ON mp.user_id = u.user_id
+      WHERE mp.match_id = ?
+    ''', [matchId]);
+
+    return result;
+  }
+
+  // Get game data for a specific match
+  Future<List<Map<String, dynamic>>> getGamesByMatchId(int matchId) async {
+    final db = await instance.database;
+    // Get all games for the match, ordered by game_id
+    return await db.query(
+      'Game',
+      where: 'match_id = ?',
+      whereArgs: [matchId],
+      orderBy: 'game_id ASC',
+    );
   }
 
   // Helper methods

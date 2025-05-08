@@ -556,8 +556,138 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
-  void _loadGameHistory() {
-    // Your load game implementation
+  Future<void> _loadGameHistory() async {
+    final dbHelper = DatabaseHelper.instance;
+
+    try {
+      // 1. Get all saved matches with their start times
+      final matches = await dbHelper.getAllMatches();
+
+      if (matches.isEmpty) {
+        _showSnackbar('No saved games found', Colors.orange);
+        return;
+      }
+
+      // 2. Show dialog to select a match
+      if (!mounted) return;
+      final selectedMatch = await showDialog<Map<String, dynamic>>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Load Saved Game'),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: matches.length,
+              itemBuilder: (context, index) {
+                final match = matches[index];
+                final DateTime startTime = DateTime.parse(match['start_time']);
+                final String formattedDate =
+                    '${startTime.year}/${startTime.month}/${startTime.day} ${startTime.hour}:${startTime.minute}';
+
+                return ListTile(
+                  title: Text('Match ID: ${match['match_id']}'),
+                  subtitle: Text('Date: $formattedDate'),
+                  onTap: () => Navigator.pop(context, match),
+                );
+              },
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+          ],
+        ),
+      );
+
+      if (selectedMatch == null) return;
+
+      // 3. Load participants for the selected match
+      final participants =
+          await dbHelper.getParticipantsByMatchId(selectedMatch['match_id']);
+
+      if (participants.isEmpty) {
+        _showSnackbar('No player data found for this match', Colors.orange);
+        return;
+      }
+
+      // 4. Load game data (scores, etc)
+      final games = await dbHelper.getGamesByMatchId(selectedMatch['match_id']);
+
+      if (games.isEmpty) {
+        _showSnackbar('No game data found for this match', Colors.orange);
+        return;
+      }
+
+      // 5. Update the game state with loaded data
+      setState(() {
+        // Reset current game state
+        gameStarted = true;
+
+        // Initialize arrays
+        final newPlayerNames = List<String>.filled(4, '');
+        final newPlayerIds = List<int>.filled(4, -1);
+        final newHasPlayers = List<bool>.filled(4, false);
+
+        // Set players based on their seat positions
+        for (final participant in participants) {
+          final seatPosition = participant['seat_position'].toString();
+          int playerIndex;
+
+          // Convert seat position string to index (East=0, South=1, West=2, North=3)
+          switch (seatPosition.toLowerCase()) {
+            case 'east':
+              playerIndex = 0;
+              break;
+            case 'south':
+              playerIndex = 1;
+              break;
+            case 'west':
+              playerIndex = 2;
+              break;
+            case 'north':
+              playerIndex = 3;
+              break;
+            default:
+              playerIndex = 0;
+          }
+
+          newPlayerNames[playerIndex] =
+              participant['username'] ?? 'Player ${playerIndex + 1}';
+          newPlayerIds[playerIndex] = participant['user_id'] ?? -1;
+          newHasPlayers[playerIndex] = true;
+
+          // Set dealer
+          if (participant['is_dealer'] == 1) {
+            dealerPosition = playerIndex;
+          }
+        }
+
+        // Update player data
+        playerNames.setAll(0, newPlayerNames);
+        playerIds.setAll(0, newPlayerIds);
+        hasPlayers.setAll(0, newHasPlayers);
+
+        // Update scores from the most recent game data
+        final lastGame = games.last;
+        if (lastGame['points'] != null) {
+          final List<dynamic> pointsList = jsonDecode(lastGame['points']);
+          for (int i = 0; i < pointsList.length && i < scores.length; i++) {
+            scores[i] = pointsList[i] as int;
+          }
+        }
+
+        // Set game state
+        handsPlayedInRound = 1; // Default to 1 for resumed games
+
+        // Show confirmation message
+        _showSnackbar('Game loaded successfully!', Colors.green);
+      });
+    } catch (e) {
+      _showSnackbar('Error loading game: ${e.toString()}', Colors.red);
+    }
   }
 
   void _draw() {
