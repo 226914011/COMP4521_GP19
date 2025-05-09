@@ -1,3 +1,5 @@
+/* eslint-disable max-len */
+/* eslint-disable require-jsdoc */
 // Firebase Functions import
 const functions = require("firebase-functions");
 
@@ -16,10 +18,16 @@ const {
 
 // Initialize your Express app (same as in server.js)
 const app = express();
-
-// Middleware (same as in server.js)
 app.use(cors({credentials: true, origin: true})); // Allows all origins
 app.use(express.json());
+
+// Helper function to format Faan value for JSON response
+function formatFaanValue(value) {
+  if (value === Infinity) {
+    return "LIMIT"; // Or "MAX_FAAN", "∞"
+  }
+  return value; // Return the number if it's finite
+}
 
 // === Endpoint for Pre-defined Melds (copied from server.js) ===
 app.post("/calculate", (req, res) => {
@@ -121,6 +129,7 @@ app.post("/calculate-from-tiles", (req, res) => {
       });
     }
 
+    // eslint-disable-next-line prefer-const
     let bestResult = {value: -1};
     let bestPermutationDetails = null;
     const config = configData || {};
@@ -132,10 +141,40 @@ app.post("/calculate-from-tiles", (req, res) => {
         `${permutation.toString()}, Faan: ${currentResult.value}`,
       );
 
-      if (currentResult.value > bestResult.value) {
-        bestResult = currentResult;
+      let numericCurrentFaan;
+      if (
+        typeof currentResult.value === "string" &&
+        currentResult.value === "∞"
+      ) {
+        numericCurrentFaan = Number.POSITIVE_INFINITY;
+      } else if (typeof currentResult.value === "number") {
+        // This includes actual Number.POSITIVE_INFINITY
+        // if the library ever returns it
+        numericCurrentFaan = currentResult.value;
+      } else {
+        // Fallback for unexpected types, though library docs suggest number
+        // or '∞'
+        console.warn(
+            `Unexpected Faan value type from library: ${typeof currentResult.value}, ` +
+          `value: ${currentResult.value} for permutation ${permutation.toString()}`,
+        );
+        numericCurrentFaan = -Infinity;
+        // Treat as lowest possible to not interfere with best score logic,
+        // or handle as error
+      }
+
+      console.log(
+          `Function /calculate-from-tiles: Permutation: ${permutation.toString()}, ` +
+      `Raw Faan: ${currentResult.value}, Numeric Faan: ${numericCurrentFaan}`,
+      );
+      if (numericCurrentFaan > bestResult.value) {
+        console.log(
+            `Function /calculate-from-tiles: New best Faan. Old best: ${bestResult.value}, ` +
+            `New numeric: ${numericCurrentFaan}`,
+        );
+        bestResult.value = numericCurrentFaan;
         bestPermutationDetails = {
-          faan: currentResult.value,
+          faan: formatFaanValue(numericCurrentFaan),
           patterns: currentResult.details,
           handStructure: permutation.toString(),
         };

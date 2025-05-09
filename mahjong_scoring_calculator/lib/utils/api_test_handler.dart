@@ -23,16 +23,22 @@ class ApiTestHandler {
    List<MahjongTile> _createDummyRawTiles() {
     // Example: Mixed Suit hand - Modify as needed for your tests
     return [
-      MahjongTile(suit: 'dot', value: 1), MahjongTile(suit: 'dot', value: 1), MahjongTile(suit: 'dot', value: 2),
-      MahjongTile(suit: 'dot', value: 1), MahjongTile(suit: 'dot', value: 2), MahjongTile(suit: 'dot', value: 2), MahjongTile(suit: 'dot', value: 2),
-      MahjongTile(suit: 'bamboo', value: 2), MahjongTile(suit: 'bamboo', value: 2), MahjongTile(suit: 'bamboo', value: 2),
-      MahjongTile(suit: 'character', value: 8), MahjongTile(suit: 'character', value: 8), MahjongTile(suit: 'character', value: 8),
-      MahjongTile(suit: 'character', value: 9), MahjongTile(suit: 'character', value: 9),
+      // MahjongTile(suit: 'dot', value: 1), MahjongTile(suit: 'dot', value: 1), MahjongTile(suit: 'dot', value: 2),
+      // MahjongTile(suit: 'dot', value: 1), MahjongTile(suit: 'dot', value: 2), MahjongTile(suit: 'dot', value: 2), MahjongTile(suit: 'dot', value: 2),
+      // MahjongTile(suit: 'character', value: 8), MahjongTile(suit: 'character', value: 8), MahjongTile(suit: 'character', value: 8),
+      // MahjongTile(suit: 'character', value: 9), MahjongTile(suit: 'character', value: 9), MahjongTile(suit: 'character', value: 9), 
+      // MahjongTile(suit: 'character', value: 5), MahjongTile(suit: 'character', value: 5), MahjongTile(suit: 'character', value: 6),
       
-      // MahjongTile(suit: 'dot', value: 1), MahjongTile(suit: 'dot', value: 1), MahjongTile(suit: 'dot', value: 1), MahjongTile(suit: 'dot', value: 1),
-      // MahjongTile(suit: 'dot', value: 2), MahjongTile(suit: 'dot', value: 2), MahjongTile(suit: 'dot', value: 2), MahjongTile(suit: 'dot', value: 2),
-      // MahjongTile(suit: 'honor', value: 2), MahjongTile(suit: 'honor', value: 2), MahjongTile(suit: 'honor', value: 2), MahjongTile(suit: 'honor', value: 2),
-      // MahjongTile(suit: 'honor', value: 3), MahjongTile(suit: 'honor', value: 3), MahjongTile(suit: 'honor', value: 3), MahjongTile(suit: 'honor', value: 3),
+      MahjongTile(suit: 'dot', value: 1), MahjongTile(suit: 'dot', value: 1), MahjongTile(suit: 'dot', value: 1), MahjongTile(suit: 'dot', value: 1),
+      MahjongTile(suit: 'dot', value: 2), MahjongTile(suit: 'dot', value: 2), MahjongTile(suit: 'dot', value: 2), MahjongTile(suit: 'dot', value: 2),
+      MahjongTile(suit: 'honor', value: 2), MahjongTile(suit: 'honor', value: 2), MahjongTile(suit: 'honor', value: 2), MahjongTile(suit: 'honor', value: 2),
+      MahjongTile(suit: 'honor', value: 3), MahjongTile(suit: 'honor', value: 3), MahjongTile(suit: 'honor', value: 3), MahjongTile(suit: 'honor', value: 3),
+      MahjongTile(suit: 'dot', value: 4), MahjongTile(suit: 'dot', value: 4),
+
+      // MahjongTile(suit: 'honor', value: 3), MahjongTile(suit: 'honor', value: 3), MahjongTile(suit: 'honor', value: 3),
+      // MahjongTile(suit: 'honor', value: 4), MahjongTile(suit: 'honor', value: 4), MahjongTile(suit: 'honor', value: 4),
+      // MahjongTile(suit: 'honor', value: 2), MahjongTile(suit: 'honor', value: 2), MahjongTile(suit: 'honor', value: 2),
+      // MahjongTile(suit: 'honor', value: 1), MahjongTile(suit: 'honor', value: 1), MahjongTile(suit: 'honor', value: 1),
       // MahjongTile(suit: 'dot', value: 4), MahjongTile(suit: 'dot', value: 4),
     ];
   }
