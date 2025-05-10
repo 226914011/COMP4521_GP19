@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
+import '../services/mahjong_api_service.dart';
 import '../widgets/custom_bottom_bar.dart';
 import '../widgets/mahjong_tile_container.dart';
 import '../widgets/selected_tile_container.dart';
@@ -88,6 +89,8 @@ class _WinningTilePageState extends State<WinningTilePage> {
       );
       return;
     }
+
+    final tiles = createMahjongTiles(_selectedTiles);
 
     // Calculate points based on selected tiles - temporary placeholder
     _calculatedPoints =

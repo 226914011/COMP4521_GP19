@@ -9,12 +9,57 @@ class MahjongTile {
   Map<String, dynamic> toJson() => {'suit': suit, 'value': value};
 }
 
+List<MahjongTile> createMahjongTiles(List<String> input) {
+  return input.map(_parseTile).toList();
+}
+
+MahjongTile _parseTile(String str) {
+  if (str.contains('-')) {
+    final parts = str.split('-');
+    final firstPart = parts[0];
+    final secondPart = parts[1];
+    
+    if (firstPart == 'wind') {
+      const windValues = {
+        'east': 1,
+        'south': 2,
+        'west': 3,
+        'north': 4,
+      };
+      return MahjongTile(suit: 'honor', value: windValues[secondPart]!);
+    } else if (firstPart == 'dragon') {
+      const dragonValues = {
+        'chun': 5,
+        'green': 6,
+        'haku': 7,
+      };
+      return MahjongTile(suit: 'honor', value: dragonValues[secondPart]!);
+    }
+  } else {
+    final match = RegExp(r'^(\D+)(\d+)$').firstMatch(str);
+    if (match != null) {
+      final suitPart = match.group(1)!;
+      final value = int.parse(match.group(2)!);
+      
+      switch (suitPart) {
+        case 'pin':
+          return MahjongTile(suit: 'dot', value: value);
+        case 'bamboo':
+          return MahjongTile(suit: 'bamboo', value: value);
+        case 'man':
+          return MahjongTile(suit: 'character', value: value);
+      }
+    }
+  }
+  throw ArgumentError('Invalid tile format: $str');
+}
+
 class MahjongMeld {
   final List<MahjongTile> tiles;
   MahjongMeld({required this.tiles});
   Map<String, dynamic> toJson() => {
-        'tiles': tiles.map((tile) => tile.toJson()).toList(),
-      };
+    'tiles': tiles.map((tile) => tile.toJson()).toList(),
+  };
 }
 
 class MahjongApiService {
