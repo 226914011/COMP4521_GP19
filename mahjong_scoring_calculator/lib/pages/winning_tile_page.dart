@@ -30,6 +30,8 @@ class _WinningTilePageState extends State<WinningTilePage> {
   late List<bool> _selectedLosers; // Will be initialized in initState
   int _calculatedPoints = 0; // Points will be calculated based on the hand
 
+  final MahjongApiService _apiService = MahjongApiService();
+
   @override
   void initState() {
     super.initState();
@@ -70,7 +72,7 @@ class _WinningTilePageState extends State<WinningTilePage> {
   }
 
   // Update the confirmation method to use player indices
-  void _confirmSelection() {
+  void _confirmSelection() async {
     // Check if we have enough tiles
     if (_selectedTiles.length < _maxTiles) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -91,10 +93,18 @@ class _WinningTilePageState extends State<WinningTilePage> {
     }
 
     final tiles = createMahjongTiles(_selectedTiles);
-
-    // Calculate points based on selected tiles - temporary placeholder
-    _calculatedPoints =
-        1000; // This should be replaced with actual scoring logic
+    try {
+      final response = await _apiService.calculateFaanFromTiles(tiles);
+      print(response);
+      final faan = response['faan'] as int;
+      //print('Faan: $faan');
+      _calculatedPoints = faan;
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${e.toString()}')),
+      );
+      return;
+    }
 
     // Create list of loser indices
     List<int> loserIndices = [];
