@@ -781,7 +781,7 @@ class _MainPageState extends State<MainPage> {
             }
 
             // Record this game in the database
-            _recordGameInDatabase(winnerIndex, points, loserIndices);
+            //_recordGameInDatabase(winnerIndex, points, loserIndices);
 
             // If current dealer won, they keep the dealership and just increment hand count
             if (winnerIndex == dealerPosition) {

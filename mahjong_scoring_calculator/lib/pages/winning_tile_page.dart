@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import '../services/mahjong_api_service.dart';
 import '../widgets/custom_bottom_bar.dart';
+import '../widgets/faan_config_dialog.dart';
 import '../widgets/mahjong_tile_container.dart';
 import '../widgets/selected_tile_container.dart';
 import '../widgets/custom_button.dart';
@@ -29,8 +30,10 @@ class _WinningTilePageState extends State<WinningTilePage> {
   int _selectedWinnerIndex = 0; // Default to first player
   late List<bool> _selectedLosers; // Will be initialized in initState
   int _calculatedPoints = 0; // Points will be calculated based on the hand
+  Map<String, dynamic> _config = {};
 
   final MahjongApiService _apiService = MahjongApiService();
+  final int maxFaan = 15;
 
   @override
   void initState() {
@@ -94,11 +97,13 @@ class _WinningTilePageState extends State<WinningTilePage> {
 
     final tiles = createMahjongTiles(_selectedTiles);
     try {
-      final response = await _apiService.calculateFaanFromTiles(tiles);
+      final response = await _apiService.calculateFaanFromTiles(tiles, config: _config);
       print(response);
-      final faan = response['faan'] as int;
-      //print('Faan: $faan');
-      _calculatedPoints = faan;
+      if (response['faan'] == 'LIMIT') {
+        _calculatedPoints = maxFaan;
+      } else {
+        _calculatedPoints = response['faan'] as int;
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: ${e.toString()}')),
@@ -326,8 +331,16 @@ class _WinningTilePageState extends State<WinningTilePage> {
     if (text == 'Confirm') {
       callback = _isLoading ? null : _confirmSelection;
     } else if (text == 'Extra') {
-      callback = () {
-        // Implement Extra functionality
+      callback = () async {
+        _config = {};
+        final config = await showDialog<Map<String, dynamic>>(
+          context: context,
+          builder: (context) => const FaanConfigDialog(),
+        );
+        
+        if (config != null) {
+          _config = config;
+        }
       };
     } else if (text == 'Manual') {
       callback = () {
