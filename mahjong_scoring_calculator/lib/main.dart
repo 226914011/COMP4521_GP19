@@ -5,6 +5,7 @@ import 'pages/main_page.dart';
 import 'pages/scanning_page.dart';
 import 'pages/winning_tile_page.dart';
 import 'pages/test_page.dart';
+import 'pages/history_page.dart'; // Import the new HistoryPage
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,6 +47,7 @@ class MyApp extends StatelessWidget {
               ),
           '/scanning': (context) => const ScanningPage(),
           '/test': (context) => const TestPage(),
+          '/history': (context) => const HistoryPage(), // Add this line
         });
   }
 }

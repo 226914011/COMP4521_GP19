@@ -12,6 +12,7 @@ import 'winning_tile_page.dart';
 import '../utils/api_test_handler.dart';
 import '../database/database_helper.dart';
 import '../enum/seat_position.dart';
+import 'history_page.dart'; // Import the history page
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -28,6 +29,8 @@ class _MainPageState extends State<MainPage> {
   final scores = [0, 0, 0, 0];
   final List<String> winds = ['East', 'South', 'West', 'North'];
   int currentWindIndex = 0;
+  int _currentMatchId = -1;
+  List<String>? _lastWinningTiles;
 
   // --- API Testing State & Handler ---
   final ApiTestHandler _apiTestHandler =
@@ -72,7 +75,20 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
-  void _resetGame() {
+  void _resetGame() async {
+    // If we have an active match, update its end time
+    if (_currentMatchId != -1) {
+      try {
+        final dbHelper = DatabaseHelper.instance;
+        await dbHelper.updateMatch(
+          _currentMatchId,
+          endTime: DateTime.now(),
+        );
+      } catch (e) {
+        _showSnackbar('Failed to complete match record: $e', Colors.orange);
+      }
+    }
+
     setState(() {
       gameStarted = false;
       playerIds
@@ -83,6 +99,9 @@ class _MainPageState extends State<MainPage> {
       _meldApiError = null;
       _rawTileApiResult = null;
       _rawTileApiError = null;
+      // Reset match tracking
+      _currentMatchId = -1;
+      _lastWinningTiles = null;
     });
   }
 
@@ -376,6 +395,15 @@ class _MainPageState extends State<MainPage> {
                           icon: const Icon(Icons.history),
                           tooltip: "Load History",
                           onPressed: _loadGameHistory, // Placeholder
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.bar_chart),
+                          tooltip: "View History",
+                          onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const HistoryPage()),
+                          ),
                         ),
                       ],
                     ),
@@ -735,29 +763,48 @@ class _MainPageState extends State<MainPage> {
         setState(() {
           // Update scores based on win result
           if (result.containsKey('winnerIndex') &&
-              result.containsKey('points')) {
+              result.containsKey('points') &&
+              result.containsKey('loserIndices')) {
             final winnerIndex = result['winnerIndex'] as int;
             final points = result['points'] as int;
+            final loserIndices = result['loserIndices'] as List<int>;
 
             // Update winner's score
             scores[winnerIndex] += points;
 
-            // Update other players' scores (losers pay points)
-            for (int i = 0; i < scores.length; i++) {
-              if (i != winnerIndex) {
-                // Basic implementation - each player pays equal amount
-                scores[i] -= (points ~/ 3);
-              }
+            // Calculate how much each loser pays
+            final pointsPerLoser = (points / loserIndices.length).ceil();
+
+            // Update losers' scores
+            for (final loserIndex in loserIndices) {
+              scores[loserIndex] -= pointsPerLoser;
             }
 
-            // If current dealer won, they keep the dealership (no rotation)
-            // Otherwise, rotate the dealership
-            if (winnerIndex != dealerPosition) {
-              _rotateDealership();
+            // Record this game in the database
+            _recordGameInDatabase(winnerIndex, points, loserIndices);
+
+            // If current dealer won, they keep the dealership and just increment hand count
+            if (winnerIndex == dealerPosition) {
+              // Increment hands in current round
+              handsPlayedInRound++;
+
+              // Check if we need to change the prevalent wind after all hands in a round
+              if (handsPlayedInRound >= 4) {
+                handsPlayedInRound = 0;
+                currentWindIndex = (currentWindIndex + 1) % winds.length;
+                isNewRound = true;
+
+                // Show message for new round
+                _showSnackbar(
+                    "New round: ${winds[currentWindIndex]} wind", Colors.amber);
+              } else {
+                // Dealer won - show a message
+                _showSnackbar("${playerNames[dealerPosition]} keeps dealership",
+                    Colors.green);
+              }
             } else {
-              // Dealer won - show a message
-              _showSnackbar("${playerNames[dealerPosition]} keeps dealership",
-                  Colors.green);
+              // Non-dealer won, rotate dealership
+              _rotateDealership();
             }
           }
         });
@@ -799,5 +846,45 @@ class _MainPageState extends State<MainPage> {
       (position) => position.name.toLowerCase() == value.toLowerCase(),
       orElse: () => SeatPosition.east, // Default to east if not found
     );
+  }
+
+  // Add this helper method to record the game
+  Future<void> _recordGameInDatabase(
+      int winnerIndex, int points, List<int> loserIndices) async {
+    try {
+      final dbHelper = DatabaseHelper.instance;
+
+      // Create a new match record if one doesn't exist yet
+      if (_currentMatchId == -1) {
+        final now = DateTime.now();
+        _currentMatchId = await dbHelper.insertMatch(startTime: now);
+
+        // Add all players as match participants
+        for (int i = 0; i < playerIds.length; i++) {
+          if (playerIds[i] != -1) {
+            await dbHelper.insertParticipant(
+              userId: playerIds[i],
+              matchId: _currentMatchId,
+              seatPosition: _seatPositionFromString(getSeatWind(i)),
+              isDealer: i == dealerPosition,
+            );
+          }
+        }
+      }
+
+      // Create winners array
+      final List<bool> winners = List.filled(4, false);
+      winners[winnerIndex] = true;
+
+      // Insert game record
+      await dbHelper.insertGame(
+        matchId: _currentMatchId,
+        points: scores,
+        isWinner: winners,
+        winningTile: [_lastWinningTiles], // Store the tiles if available
+      );
+    } catch (e) {
+      _showSnackbar('Failed to record game: $e', Colors.red);
+    }
   }
 }

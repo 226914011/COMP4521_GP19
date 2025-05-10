@@ -64,6 +64,8 @@ Future<Map<String, dynamic>> extractTilesFromImage(File imagePath) async {
   }
 }
 
+// Two methods to test the API
+// 1. Using a local asset image
 Future<Map<String, dynamic>> testAPI() async {
   try {
     // Directly load asset without temporary file
@@ -160,8 +162,9 @@ List<String> processPredictions(List<dynamic> predictions) {
       case 's':
         return 'bamboo$number';
       case 'z':
-        if (number <= 4)
+        if (number <= 4) {
           return 'wind-${['east', 'south', 'west', 'north'][number - 1]}';
+        }
         return 'dragon-${['haku', 'green', 'chun'][number - 5]}';
       default:
         return 'unknown';
