@@ -22,15 +22,23 @@ Future<Map<String, dynamic>> extractTilesFromImage(File imagePath) async {
 
     const apiKey = "3xxccwZJ583VW1srMge4";
     final url =
-        "https://serverless.roboflow.com/master-oez61/7?api_key=$apiKey";
+        "https://serverless.roboflow.com/infer/workflows/mobile-project/detect-count-and-visualize";
 
     // Based on the Node.js example
-    final headers = {'Content-Type': 'application/x-www-form-urlencoded'};
+    final headers = {'Content-Type': 'application/json'};
 
     final response = await http.post(
       Uri.parse(url),
       headers: headers,
-      body: base64Image, // Send raw base64 string directly
+      body: jsonEncode({
+        "api_key": apiKey,
+        "inputs": {
+          "image": {
+            "type": "base64",
+            "value": base64Image,
+          }
+        }
+      }),
     );
 
     if (response.statusCode == 200 || response.statusCode == 201) {
@@ -64,15 +72,12 @@ Future<Map<String, dynamic>> testAPI() async {
     final base64Image = base64Encode(bytes);
 
     const apiKey = "3xxccwZJ583VW1srMge4";
-    //final url =
-    //    "https://serverless.roboflow.com/master-oez61/7?api_key=$apiKey";
     final url =
         "https://serverless.roboflow.com/infer/workflows/mobile-project/detect-count-and-visualize";
 
     // Use the same approach as the Node.js example
     final response = await http.post(
       Uri.parse(url),
-      //headers: {'Content-Type': 'application/x-www-form-urlencoded'},
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         "api_key": apiKey,
