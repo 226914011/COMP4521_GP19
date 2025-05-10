@@ -37,9 +37,9 @@ class _MainPageState extends State<MainPage> {
       ApiTestHandler(); // Instance of the handler
 
   // State for Melds API Test
-  Map<String, dynamic>? _meldApiResult;
-  String? _meldApiError;
-  bool _isMeldLoading = false;
+  // Map<String, dynamic>? _meldApiResult;
+  // String? _meldApiError;
+  // bool _isMeldLoading = false;
 
   // State for Raw Tiles API Test
   Map<String, dynamic>? _rawTileApiResult;
@@ -95,8 +95,8 @@ class _MainPageState extends State<MainPage> {
           .asMap()
           .forEach((index, id) => _resetPlayer(index)); // Reset all players
       // Clear API test results on game reset
-      _meldApiResult = null;
-      _meldApiError = null;
+      // _meldApiResult = null;
+      // _meldApiError = null;
       _rawTileApiResult = null;
       _rawTileApiError = null;
       // Reset match tracking
@@ -106,35 +106,35 @@ class _MainPageState extends State<MainPage> {
   }
 
   // --- API Test Execution Methods ---
-  Future<void> _runMeldTest() async {
-    if (_isMeldLoading) return; // Prevent double taps
-    setState(() {
-      _isMeldLoading = true;
-      _meldApiResult = null; // Clear previous results
-      _meldApiError = null;
-    });
+  // Future<void> _runMeldTest() async {
+  //   if (_isMeldLoading) return; // Prevent double taps
+  //   setState(() {
+  //     _isMeldLoading = true;
+  //     _meldApiResult = null; // Clear previous results
+  //     _meldApiError = null;
+  //   });
 
-    try {
-      final result = await _apiTestHandler.executeMeldTest(); // Call handler
-      if (!mounted) return; // Check if widget is still alive after await
-      setState(() {
-        _meldApiResult = result;
-      });
-      _showSnackbar('Meld API Success!', Colors.green);
-    } catch (e) {
-      if (!mounted) return;
-      final errorMessage = "Meld Test Failed: ${e.toString()}";
-      setState(() {
-        _meldApiError = errorMessage;
-      });
-      _showSnackbar(errorMessage, Colors.red);
-    } finally {
-      if (!mounted) return;
-      setState(() {
-        _isMeldLoading = false;
-      }); // Ensure loading stops
-    }
-  }
+  //   try {
+  //     final result = await _apiTestHandler.executeMeldTest(); // Call handler
+  //     if (!mounted) return; // Check if widget is still alive after await
+  //     setState(() {
+  //       _meldApiResult = result;
+  //     });
+  //     _showSnackbar('Meld API Success!', Colors.green);
+  //   } catch (e) {
+  //     if (!mounted) return;
+  //     final errorMessage = "Meld Test Failed: ${e.toString()}";
+  //     setState(() {
+  //       _meldApiError = errorMessage;
+  //     });
+  //     _showSnackbar(errorMessage, Colors.red);
+  //   } finally {
+  //     if (!mounted) return;
+  //     setState(() {
+  //       _isMeldLoading = false;
+  //     }); // Ensure loading stops
+  //   }
+  // }
 
   Future<void> _runRawTileTest() async {
     if (_isRawTileLoading) return; // Prevent double taps
@@ -290,39 +290,39 @@ class _MainPageState extends State<MainPage> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           // Meld Test Button & Result Display
-                          ElevatedButton(
-                            onPressed: _isMeldLoading ? null : _runMeldTest,
-                            child: _isMeldLoading
-                                ? const SizedBox(
-                                    width: 16,
-                                    height: 16,
-                                    child: CircularProgressIndicator(
-                                        strokeWidth: 2))
-                                : const Text('Test Melds API'),
-                          ),
-                          // Conditional display for Meld results/errors
-                          if (_meldApiResult != null)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 4.0),
-                              child: Text(
-                                'Meld OK: ${jsonEncode(_meldApiResult)}', // Display JSON result
-                                style: const TextStyle(
-                                    fontSize: 10, color: Colors.green),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          if (_meldApiError != null)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 4.0),
-                              child: Text(
-                                _meldApiError!, // Display error message
-                                style: const TextStyle(
-                                    fontSize: 10, color: Colors.red),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
+                          // ElevatedButton(
+                          //   onPressed: _isMeldLoading ? null : _runMeldTest,
+                          //   child: _isMeldLoading
+                          //       ? const SizedBox(
+                          //           width: 16,
+                          //           height: 16,
+                          //           child: CircularProgressIndicator(
+                          //               strokeWidth: 2))
+                          //       : const Text('Test Melds API'),
+                          // ),
+                          // // Conditional display for Meld results/errors
+                          // if (_meldApiResult != null)
+                          //   Padding(
+                          //     padding: const EdgeInsets.only(top: 4.0),
+                          //     child: Text(
+                          //       'Meld OK: ${jsonEncode(_meldApiResult)}', // Display JSON result
+                          //       style: const TextStyle(
+                          //           fontSize: 10, color: Colors.green),
+                          //       textAlign: TextAlign.center,
+                          //     ),
+                          //   ),
+                          // if (_meldApiError != null)
+                          //   Padding(
+                          //     padding: const EdgeInsets.only(top: 4.0),
+                          //     child: Text(
+                          //       _meldApiError!, // Display error message
+                          //       style: const TextStyle(
+                          //           fontSize: 10, color: Colors.red),
+                          //       textAlign: TextAlign.center,
+                          //     ),
+                          //   ),
 
-                          const SizedBox(height: 15), // Spacer
+                          // const SizedBox(height: 15), // Spacer
 
                           // Raw Tile Test Button & Result Display
                           ElevatedButton(
