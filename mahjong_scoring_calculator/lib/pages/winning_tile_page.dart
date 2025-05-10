@@ -181,9 +181,22 @@ class _WinningTilePageState extends State<WinningTilePage> {
                                             final apiResult =
                                                 await extractTilesFromImage(
                                                     File(imagePath));
+                                            final outputs = apiResult['outputs']
+                                                as List<dynamic>;
+                                            final Map<String, dynamic>
+                                                firstOutput = outputs[0]
+                                                    as Map<String, dynamic>;
+                                            final Map<String, dynamic>
+                                                predictionsData =
+                                                firstOutput['predictions']
+                                                    as Map<String, dynamic>;
+                                            final List<dynamic>
+                                                predictionsList =
+                                                predictionsData['predictions']
+                                                    as List<dynamic>;
                                             final processedTiles =
                                                 processPredictions(
-                                                    apiResult['predictions']);
+                                                    predictionsList);
                                             _addTilesByCamera(processedTiles);
 
                                             ScaffoldMessenger.of(context)
@@ -245,8 +258,7 @@ class _WinningTilePageState extends State<WinningTilePage> {
       width: MediaQuery.of(context).size.width * 0.8,
       child: Row(
         children: [
-          const Text('Winner:',
-              style: TextStyle(fontWeight: FontWeight.bold)),
+          const Text('Winner:', style: TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(width: 8),
           // Dropdown with player names instead of wind directions
           DropdownButton<int>(
@@ -266,8 +278,7 @@ class _WinningTilePageState extends State<WinningTilePage> {
             },
           ),
           const Spacer(),
-          const Text('Losers:',
-              style: TextStyle(fontWeight: FontWeight.bold)),
+          const Text('Losers:', style: TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(width: 8),
           // Checkboxes with player initials or names
           for (int i = 0; i < widget.playerNames.length; i++)
@@ -286,8 +297,7 @@ class _WinningTilePageState extends State<WinningTilePage> {
                           },
                   ),
                   Text(widget.playerNames[i].isNotEmpty
-                      ? widget.playerNames[i]
-                          .substring(0, 1) // First initial
+                      ? widget.playerNames[i].substring(0, 1) // First initial
                       : '$i'), // Fallback to index if name is empty
                 ],
               ),

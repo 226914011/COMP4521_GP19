@@ -47,7 +47,11 @@ class _TestPageState extends State<TestPage> {
 
     try {
       final result = await extractTilesFromImage(File(imagePath));
-      setState(() => _response = _formatJson(jsonEncode(result)));
+      final outputs = result['outputs'] as List<dynamic>;
+      final Map<String, dynamic> firstOutput = outputs[0] as Map<String, dynamic>;
+      final Map<String, dynamic> predictionsData = firstOutput['predictions'] as Map<String, dynamic>;
+      final List<dynamic> predictionsList = predictionsData['predictions'] as List<dynamic>;
+      setState(() => _response = _formatJson(jsonEncode(predictionsList)));
     } catch (e) {
       setState(() => _response = 'Error: ${e.toString()}');
     } finally {
