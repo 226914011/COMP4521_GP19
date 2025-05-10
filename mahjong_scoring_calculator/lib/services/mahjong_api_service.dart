@@ -67,35 +67,35 @@ class MahjongApiService {
   final String _baseUrl = 'https://api-oxmwcvwira-uc.a.run.app'; //'http://localhost:5001/hk-mahjong-36eb0/us-central1/api'; //hk-mahjong-36eb0
 
   // Method for pre-defined melds (/calculate endpoint)
-  Future<Map<String, dynamic>> calculateFaan(
-      List<MahjongMeld> melds, {Map<String, dynamic>? config}) async {
-    final url = Uri.parse('$_baseUrl/calculate');
-    final body = jsonEncode({
-      'melds': melds.map((meld) => meld.toJson()).toList(),
-      if (config != null) 'config': config,
-    });
+  // Future<Map<String, dynamic>> calculateFaan(
+  //     List<MahjongMeld> melds, {Map<String, dynamic>? config}) async {
+  //   final url = Uri.parse('$_baseUrl/calculate');
+  //   final body = jsonEncode({
+  //     'melds': melds.map((meld) => meld.toJson()).toList(),
+  //     if (config != null) 'config': config,
+  //   });
 
-    print('Sending to API (/calculate): $body');
-    try {
-      final response = await http.post(url,
-          headers: {'Content-Type': 'application/json; charset=UTF-8'},
-          body: body);
-      print('API Status Code (/calculate): ${response.statusCode}');
-      print('API Response Body (/calculate): ${response.body}');
+  //   print('Sending to API (/calculate): $body');
+  //   try {
+  //     final response = await http.post(url,
+  //         headers: {'Content-Type': 'application/json; charset=UTF-8'},
+  //         body: body);
+  //     print('API Status Code (/calculate): ${response.statusCode}');
+  //     print('API Response Body (/calculate): ${response.body}');
 
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else {
-        Map<String, dynamic> errorResult = {'error': 'API Error'};
-        try { errorResult = jsonDecode(response.body); } catch (_) {}
-        throw Exception(
-            'Failed /calculate: ${response.statusCode} - ${errorResult['error'] ?? response.body}');
-      }
-    } catch (e) {
-      print('Network error /calculate: $e');
-      throw Exception('Network error /calculate: $e');
-    }
-  }
+  //     if (response.statusCode == 200) {
+  //       return jsonDecode(response.body);
+  //     } else {
+  //       Map<String, dynamic> errorResult = {'error': 'API Error'};
+  //       try { errorResult = jsonDecode(response.body); } catch (_) {}
+  //       throw Exception(
+  //           'Failed /calculate: ${response.statusCode} - ${errorResult['error'] ?? response.body}');
+  //     }
+  //   } catch (e) {
+  //     print('Network error /calculate: $e');
+  //     throw Exception('Network error /calculate: $e');
+  //   }
+  // }
 
   // Method for raw tiles (/calculate-from-tiles endpoint)
   Future<Map<String, dynamic>> calculateFaanFromTiles(
