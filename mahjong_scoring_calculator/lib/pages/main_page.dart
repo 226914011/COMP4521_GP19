@@ -31,6 +31,9 @@ class _MainPageState extends State<MainPage> {
   int currentWindIndex = 0;
   int _currentMatchId = -1;
   List<String>? _lastWinningTiles;
+  int dealerPosition = 0; // 0 = East player, 1 = South, etc.
+  int handsPlayedInRound = 1;
+  bool isNewRound = true;
 
   // --- API Testing State & Handler ---
   final ApiTestHandler _apiTestHandler =
@@ -47,9 +50,11 @@ class _MainPageState extends State<MainPage> {
   bool _isRawTileLoading = false;
   // --- End API Testing State ---
 
-  // --- Existing Game Logic Methods ---
-  void _checkStartGame() {
+  // --- Game State ---
+  Future<void> _checkStartGame() async {
     if (hasPlayers.every((player) => player)) {
+      // Get the match ID first, then update state
+      final matchId = await _createNewMatchId();
       setState(() {
         gameStarted = true;
         // Randomly select initial dealer position (0-3)
@@ -57,6 +62,7 @@ class _MainPageState extends State<MainPage> {
         currentWindIndex = 0; // Start with East wind
         handsPlayedInRound = 1;
         isNewRound = true;
+        _currentMatchId = matchId;
       });
     } else {
       showDialog(
@@ -238,11 +244,6 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-  // Add these variables to your _MainPageState class
-  int dealerPosition = 0; // 0 = East player, 1 = South, etc.
-  int handsPlayedInRound = 1;
-  bool isNewRound = true;
-
   // Update the wind indicator to show actual wind
   Widget _buildWindIndicator() {
     return Container(
@@ -389,12 +390,12 @@ class _MainPageState extends State<MainPage> {
                         IconButton(
                           icon: const Icon(Icons.save),
                           tooltip: "Save Game",
-                          onPressed: _saveAndLoadGame, // Placeholder
+                          onPressed: _saveGame,
                         ),
                         IconButton(
                           icon: const Icon(Icons.history),
                           tooltip: "Load History",
-                          onPressed: _loadGameHistory, // Placeholder
+                          onPressed: _loadGameHistory,
                         ),
                         IconButton(
                           icon: const Icon(Icons.bar_chart),
@@ -494,7 +495,17 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-  Future<void> _saveAndLoadGame() async {
+  // Create new match ID
+  Future<int> _createNewMatchId() async {
+    final dbHelper = DatabaseHelper.instance;
+    return await dbHelper.insertMatch(
+      startTime: DateTime.now(),
+      // Leave endTime null since game is in progress
+    );
+  }
+
+  // --- Save Game Methods ---
+  Future<void> _saveGame() async {
     // Only allow saving if a game is in progress
     if (!gameStarted) {
       _showSnackbar('No active game to save', Colors.orange);
@@ -511,12 +522,11 @@ class _MainPageState extends State<MainPage> {
     try {
       final dbHelper = DatabaseHelper.instance;
 
-      // 1. Create a new match record
-      final now = DateTime.now();
-      final matchId = await dbHelper.insertMatch(
-        startTime: now,
-        // Leave endTime null since game is in progress
-      );
+      // 1. Create a new match record if one doesn't exist
+      if (_currentMatchId == -1) {
+        final now = DateTime.now();
+        _currentMatchId = await dbHelper.insertMatch(startTime: now);
+      }
 
       // 2. Add all players as match participants
       for (int i = 0; i < playerIds.length; i++) {
@@ -528,7 +538,7 @@ class _MainPageState extends State<MainPage> {
 
         await dbHelper.insertParticipant(
           userId: playerIds[i],
-          matchId: matchId,
+          matchId: _currentMatchId,
           seatPosition: _seatPositionFromString(seatPosition),
           isDealer: i == dealerPosition, // Set dealer flag
         );
@@ -542,7 +552,7 @@ class _MainPageState extends State<MainPage> {
       final List<bool> winners = List.filled(4, false);
 
       await dbHelper.insertGame(
-        matchId: matchId,
+        matchId: _currentMatchId,
         points: scores,
         isWinner: winners, // No winner for saved game in progress
         // Optional: Include other game state if needed
@@ -550,7 +560,7 @@ class _MainPageState extends State<MainPage> {
 
       // Show success message
       _showSnackbar(
-          'Game saved successfully! Match ID: $matchId', Colors.green);
+          'Game saved successfully! Match ID: $_currentMatchId', Colors.green);
 
       // Optional: Offer to continue or start a new game
       if (mounted) {
@@ -559,7 +569,7 @@ class _MainPageState extends State<MainPage> {
           builder: (context) => AlertDialog(
             title: const Text('Game Saved'),
             content: Text(
-                'Your game has been saved with Match ID: $matchId. You can load it later from the history.'),
+                'Your game has been saved with Match ID: $_currentMatchId. You can load it later from the history.'),
             actions: [
               TextButton(
                 onPressed: () {
@@ -653,6 +663,9 @@ class _MainPageState extends State<MainPage> {
       setState(() {
         // Reset current game state
         gameStarted = true;
+
+        // Set current match ID
+        _currentMatchId = selectedMatch['match_id'];
 
         // Initialize arrays
         final newPlayerNames = List<String>.filled(4, '');
