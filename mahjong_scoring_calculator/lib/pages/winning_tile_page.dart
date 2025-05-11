@@ -139,61 +139,56 @@ class _WinningTilePageState extends State<WinningTilePage> {
     }
 
     // Show manual input dialog
-    final manualFaan = await showDialog<int>(
-      context: context,
-      builder: (context) {
-        final TextEditingController controller = TextEditingController();
-        return AlertDialog(
-          title: const Text('Enter Manual Faan'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: controller,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  hintText: 'Enter faan value (0-15)',
+    final manualFaan = await showModalBottomSheet<int>(
+    context: context,
+    isScrollControlled: true,
+    builder: (context) {
+      final TextEditingController controller = TextEditingController();
+      return Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: SingleChildScrollView(
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.8,
+            ),
+            child: TextField(
+              controller: controller,
+              keyboardType: TextInputType.number,
+              autofocus: true,
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
+                labelText: 'Enter faan value',
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.check),
+                  onPressed: () {
+                    final input = controller.text;
+                    final parsed = int.tryParse(input);
+                    
+                    if (parsed == null || parsed < 0 || parsed > maxFaan) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            parsed == null 
+                              ? 'Please enter a valid number'
+                              : 'Value must be between 0 and $maxFaan',
+                          ),
+                        ),
+                      );
+                      return;
+                    }
+                    Navigator.pop(context, parsed);
+                  },
                 ),
               ),
-              const SizedBox(height: 10),
-              Text(
-                'Enter a value between 0 and $maxFaan',
-                style: TextStyle(color: Colors.grey[600], fontSize: 12),
-              ),
-            ],
+            ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, null),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                final input = controller.text;
-                final parsed = int.tryParse(input);
-                
-                if (parsed == null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Please enter a valid number')),
-                  );
-                  return;
-                }
-
-                if (parsed < 0 || parsed > maxFaan) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Value must be between 0 and $maxFaan')),
-                  );
-                  return;
-                }
-
-                Navigator.pop(context, parsed);
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
+        ),
+      );
+    },
+  );
 
     if (manualFaan == null) return;
 
