@@ -181,13 +181,13 @@ class _WinningTilePageState extends State<WinningTilePage> {
                     final input = controller.text;
                     final parsed = int.tryParse(input);
                     
-                    if (parsed == null || parsed < 0 || parsed > maxFaan) {
+                    if (parsed == null || parsed < 0 || parsed > _settingsService.maxFan) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
                             parsed == null 
                               ? 'Please enter a valid number'
-                              : 'Value must be between 0 and $maxFaan',
+                              : 'Value must be between 0 and ${_settingsService.maxFan}',
                           ),
                         ),
                       );
@@ -215,7 +215,7 @@ class _WinningTilePageState extends State<WinningTilePage> {
           .where((entry) => entry.value)
           .map((entry) => entry.key)
           .toList(),
-      'points': manualFaan,
+      'points': (manualFaan * _settingsService.fanToPointRatio).round(),
       'tiles': const [], // Empty array for manual input
     });
   }
@@ -226,21 +226,6 @@ class _WinningTilePageState extends State<WinningTilePage> {
     final mahjongContainerWidth = deviceSize.width * 0.55;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Select Winning Tiles'),
-        // Add a display of current settings for clarity
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: Center(
-              child: Text(
-                'Max: ${_settingsService.maxFan} Fan / Ratio: ${_settingsService.fanToPointRatio}',
-                style: const TextStyle(fontSize: 12),
-              ),
-            ),
-          ),
-        ],
-      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
