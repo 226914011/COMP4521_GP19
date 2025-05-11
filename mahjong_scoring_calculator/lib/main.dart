@@ -6,6 +6,7 @@ import 'pages/scanning_page.dart';
 import 'pages/winning_tile_page.dart';
 import 'pages/test_page.dart';
 import 'pages/history_page.dart'; // Import the new HistoryPage
+import 'services/settings_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,6 +18,9 @@ void main() async {
   } catch (e) {
     print('Database initialization failed: $e');
   }
+
+  // Initialize settings before app starts
+  await SettingsService().init();
 
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   SystemChrome.setPreferredOrientations([
