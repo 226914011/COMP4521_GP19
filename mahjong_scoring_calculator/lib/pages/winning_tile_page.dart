@@ -147,62 +147,65 @@ class _WinningTilePageState extends State<WinningTilePage> {
     // Check loser selection (same as confirm logic)
     if (!_selectedLosers.contains(true)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select at least one losing player')),
+        const SnackBar(
+            content: Text('Please select at least one losing player')),
       );
       return;
     }
 
     // Show manual input dialog
     final manualFaan = await showModalBottomSheet<int>(
-    context: context,
-    isScrollControlled: true,
-    builder: (context) {
-      final TextEditingController controller = TextEditingController();
-      return Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-        ),
-        child: SingleChildScrollView(
-          child: Container(
-            padding: const EdgeInsets.all(24),
-            constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(context).size.height * 0.8,
-            ),
-            child: TextField(
-              controller: controller,
-              keyboardType: TextInputType.number,
-              autofocus: true,
-              decoration: InputDecoration(
-                border: const OutlineInputBorder(),
-                labelText: 'Enter faan value',
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.check),
-                  onPressed: () {
-                    final input = controller.text;
-                    final parsed = int.tryParse(input);
-                    
-                    if (parsed == null || parsed < 0 || parsed > _settingsService.maxFan) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            parsed == null 
-                              ? 'Please enter a valid number'
-                              : 'Value must be between 0 and ${_settingsService.maxFan}',
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        final TextEditingController controller = TextEditingController();
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: SingleChildScrollView(
+            child: Container(
+              padding: const EdgeInsets.all(24),
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.8,
+              ),
+              child: TextField(
+                controller: controller,
+                keyboardType: TextInputType.number,
+                autofocus: true,
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
+                  labelText: 'Enter faan value',
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.check),
+                    onPressed: () {
+                      final input = controller.text;
+                      final parsed = int.tryParse(input);
+
+                      if (parsed == null ||
+                          parsed < 0 ||
+                          parsed > _settingsService.maxFan) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              parsed == null
+                                  ? 'Please enter a valid number'
+                                  : 'Value must be between 0 and ${_settingsService.maxFan}',
+                            ),
                           ),
-                        ),
-                      );
-                      return;
-                    }
-                    Navigator.pop(context, parsed);
-                  },
+                        );
+                        return;
+                      }
+                      Navigator.pop(context, parsed);
+                    },
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-      );
-    },
-  );
+        );
+      },
+    );
 
     if (manualFaan == null) return;
 
@@ -226,6 +229,7 @@ class _WinningTilePageState extends State<WinningTilePage> {
     final mahjongContainerWidth = deviceSize.width * 0.55;
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
