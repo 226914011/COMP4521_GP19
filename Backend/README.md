@@ -5,8 +5,7 @@ Prerequisites:
 
 1. A Firebase project created on the Firebase Console.
 2. Node.js and npm installed on your machine.
-3. Firebase CLI installed: npm install -g firebase-tools
-4. Logged into Firebase CLI: firebase login
+3. Logged into Firebase CLI: firebase login
 
 For emulator testing
 1. cd .\functions\  
