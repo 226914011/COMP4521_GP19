@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
-import 'dart:math'; // Add this import for Random
+import 'dart:math';
+import 'dart:async';
 
 import '../widgets/custom_bottom_bar.dart';
 import '../widgets/player_container.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/player_selection_dialog.dart';
-import 'scanning_page.dart';
-import 'test_page.dart';
 import 'winning_tile_page.dart';
 import '../utils/api_test_handler.dart';
 import '../database/database_helper.dart';
 import '../enum/seat_position.dart';
-import 'history_page.dart'; // Import the history page
+import '../services/settings_service.dart'; // Import the settings service
+import 'history_page.dart';
+import 'settings_page.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -34,6 +35,9 @@ class _MainPageState extends State<MainPage> {
   int dealerPosition = 0; // 0 = East player, 1 = South, etc.
   int handsPlayedInRound = 1;
   bool isNewRound = true;
+  final _settingsService = SettingsService();
+
+  StreamSubscription? _hideDebugButtonsSubscription;
 
   // --- API Testing State & Handler ---
   final ApiTestHandler _apiTestHandler =
@@ -219,31 +223,6 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-  void _showDebugMenu() {
-    showDialog(
-      context: context,
-      builder: (context) => SimpleDialog(
-        title: const Text('Debug Menu'),
-        children: [
-          _buildDebugOption(
-              'Winning Tiles Page', WinningTilePage(playerNames: playerNames)),
-          _buildDebugOption('Scanning Page', const ScanningPage()),
-          _buildDebugOption('API Test Page', const TestPage()),
-        ],
-      ),
-    );
-  }
-
-  ListTile _buildDebugOption(String title, Widget page) {
-    return ListTile(
-      title: Text(title),
-      onTap: () {
-        Navigator.pop(context); // Close the dialog
-        Navigator.push(context, MaterialPageRoute(builder: (_) => page));
-      },
-    );
-  }
-
   // Update the wind indicator to show actual wind
   Widget _buildWindIndicator() {
     return Container(
@@ -290,76 +269,44 @@ class _MainPageState extends State<MainPage> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          // Meld Test Button & Result Display
-                          // ElevatedButton(
-                          //   onPressed: _isMeldLoading ? null : _runMeldTest,
-                          //   child: _isMeldLoading
-                          //       ? const SizedBox(
-                          //           width: 16,
-                          //           height: 16,
-                          //           child: CircularProgressIndicator(
-                          //               strokeWidth: 2))
-                          //       : const Text('Test Melds API'),
-                          // ),
-                          // // Conditional display for Meld results/errors
-                          // if (_meldApiResult != null)
-                          //   Padding(
-                          //     padding: const EdgeInsets.only(top: 4.0),
-                          //     child: Text(
-                          //       'Meld OK: ${jsonEncode(_meldApiResult)}', // Display JSON result
-                          //       style: const TextStyle(
-                          //           fontSize: 10, color: Colors.green),
-                          //       textAlign: TextAlign.center,
-                          //     ),
-                          //   ),
-                          // if (_meldApiError != null)
-                          //   Padding(
-                          //     padding: const EdgeInsets.only(top: 4.0),
-                          //     child: Text(
-                          //       _meldApiError!, // Display error message
-                          //       style: const TextStyle(
-                          //           fontSize: 10, color: Colors.red),
-                          //       textAlign: TextAlign.center,
-                          //     ),
-                          //   ),
-
-                          // const SizedBox(height: 15), // Spacer
-
-                          // Raw Tile Test Button & Result Display
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blueAccent),
-                            onPressed:
-                                _isRawTileLoading ? null : _runRawTileTest,
-                            child: _isRawTileLoading
-                                ? const SizedBox(
-                                    width: 16,
-                                    height: 16,
-                                    child: CircularProgressIndicator(
-                                        strokeWidth: 2, color: Colors.white))
-                                : const Text('Test Raw Tiles API'),
-                          ),
-                          // Conditional display for Raw Tile results/errors
-                          if (_rawTileApiResult != null)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 4.0),
-                              child: Text(
-                                'Raw OK: ${jsonEncode(_rawTileApiResult)}', // Display JSON result
-                                style: const TextStyle(
-                                    fontSize: 10, color: Colors.blue),
-                                textAlign: TextAlign.center,
-                              ),
+                          // Only show API test buttons if debug buttons are not hidden
+                          if (!_settingsService.hideDebugButtons) ...[
+                            // Raw Tile Test Button & Result Display
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.blueAccent),
+                              onPressed:
+                                  _isRawTileLoading ? null : _runRawTileTest,
+                              child: _isRawTileLoading
+                                  ? const SizedBox(
+                                      width: 16,
+                                      height: 16,
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 2, color: Colors.white))
+                                  : const Text('Test Raw Tiles API'),
                             ),
-                          if (_rawTileApiError != null)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 4.0),
-                              child: Text(
-                                _rawTileApiError!, // Display error message
-                                style: const TextStyle(
-                                    fontSize: 10, color: Colors.orange),
-                                textAlign: TextAlign.center,
+                            // Conditional display for Raw Tile results/errors
+                            if (_rawTileApiResult != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 4.0),
+                                child: Text(
+                                  'Raw OK: ${jsonEncode(_rawTileApiResult)}', // Display JSON result
+                                  style: const TextStyle(
+                                      fontSize: 10, color: Colors.blue),
+                                  textAlign: TextAlign.center,
+                                ),
                               ),
-                            ),
+                            if (_rawTileApiError != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 4.0),
+                                child: Text(
+                                  _rawTileApiError!, // Display error message
+                                  style: const TextStyle(
+                                      fontSize: 10, color: Colors.orange),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                          ],
                         ],
                       ),
                     ),
@@ -490,9 +437,32 @@ class _MainPageState extends State<MainPage> {
         ),
       ),
       bottomNavigationBar: CustomBottomBar(
-        onDebugPressed: _showDebugMenu,
+        playerNames: playerNames,
+        hideDebugButtons: _settingsService.hideDebugButtons,
+        onSettingsPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const SettingsPage()),
+        ),
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Listen for changes to hideDebugButtons setting
+    _hideDebugButtonsSubscription =
+        _settingsService.hideDebugButtonsStream.listen((value) {
+      setState(() {
+        // Refresh UI when setting changes
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _hideDebugButtonsSubscription?.cancel();
+    super.dispose();
   }
 
   // Create new match ID
@@ -794,7 +764,7 @@ class _MainPageState extends State<MainPage> {
             }
 
             // Record this game in the database
-            //_recordGameInDatabase(winnerIndex, points, loserIndices);
+            _recordGameInDatabase(winnerIndex, points, loserIndices);
 
             // If current dealer won, they keep the dealership and just increment hand count
             if (winnerIndex == dealerPosition) {
