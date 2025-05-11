@@ -469,10 +469,22 @@ class _MainPageState extends State<MainPage> {
   // Create new match ID
   Future<int> _createNewMatchId() async {
     final dbHelper = DatabaseHelper.instance;
-    return await dbHelper.insertMatch(
+    _currentMatchId = await dbHelper.insertMatch(
       startTime: DateTime.now(),
       // Leave endTime null since game is in progress
     );
+    // Add all players as match participants
+    for (int i = 0; i < playerIds.length; i++) {
+      if (playerIds[i] != -1) {
+        await dbHelper.insertParticipant(
+          userId: playerIds[i],
+          matchId: _currentMatchId,
+          seatPosition: _seatPositionFromString(getSeatWind(i)),
+          isDealer: i == dealerPosition,
+        );
+      }
+    }
+    return _currentMatchId;
   }
 
   // --- Save Game Methods ---
