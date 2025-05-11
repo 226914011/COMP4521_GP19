@@ -7,6 +7,7 @@ import '../widgets/mahjong_tile_container.dart';
 import '../widgets/selected_tile_container.dart';
 import '../widgets/custom_button.dart';
 import '../yolo/model.dart';
+import '../services/settings_service.dart'; // Import SettingsService
 import 'scanning_page.dart';
 
 class WinningTilePage extends StatefulWidget {
@@ -33,7 +34,9 @@ class _WinningTilePageState extends State<WinningTilePage> {
   Map<String, dynamic> _config = {};
 
   final MahjongApiService _apiService = MahjongApiService();
-  final int maxFaan = 15;
+
+  // Use SettingsService instead of hardcoded values
+  final _settingsService = SettingsService();
 
   @override
   void initState() {
@@ -75,7 +78,7 @@ class _WinningTilePageState extends State<WinningTilePage> {
     setState(() => _selectedTiles.clear());
   }
 
-  // Update the confirmation method to use player indices
+  // Update the confirmation method to use player indices and apply settings
   void _confirmSelection() async {
     // Check if we have enough tiles
     if (_selectedTiles.length < _maxTiles) {
@@ -98,13 +101,24 @@ class _WinningTilePageState extends State<WinningTilePage> {
 
     final tiles = createMahjongTiles(_selectedTiles);
     try {
-      final response = await _apiService.calculateFaanFromTiles(tiles, config: _config);
+      final response =
+          await _apiService.calculateFaanFromTiles(tiles, config: _config);
       print(response);
+
+      int rawFaan;
       if (response['faan'] == 'LIMIT') {
-        _calculatedPoints = maxFaan;
+        // Use maxFan from settings for limit hands
+        rawFaan = _settingsService.maxFan;
       } else {
-        _calculatedPoints = response['faan'] as int;
+        rawFaan = response['faan'] as int;
+        // Cap the Fann at the maximum fan setting if needed
+        if (rawFaan > _settingsService.maxFan) {
+          rawFaan = _settingsService.maxFan;
+        }
       }
+
+      // Apply the fan-to-point ratio from settings
+      _calculatedPoints = (rawFaan * _settingsService.fanToPointRatio).round();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: ${e.toString()}')),
@@ -217,6 +231,21 @@ class _WinningTilePageState extends State<WinningTilePage> {
     final mahjongContainerWidth = deviceSize.width * 0.55;
 
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Select Winning Tiles'),
+        // Add a display of current settings for clarity
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: Center(
+              child: Text(
+                'Max: ${_settingsService.maxFan} Fan / Ratio: ${_settingsService.fanToPointRatio}',
+                style: const TextStyle(fontSize: 12),
+              ),
+            ),
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -419,7 +448,7 @@ class _WinningTilePageState extends State<WinningTilePage> {
           context: context,
           builder: (context) => const FaanConfigDialog(),
         );
-        
+
         if (config != null) {
           setState(() {
             _config = config;
