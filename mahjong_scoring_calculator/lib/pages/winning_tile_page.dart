@@ -41,6 +41,7 @@ class _WinningTilePageState extends State<WinningTilePage> {
     // Initialize losers list with the right length based on player count
     _selectedLosers = List.generate(
         widget.playerNames.length, (index) => index != _selectedWinnerIndex);
+    _config = {};
   }
 
   // Helper to update losers when winner changes
@@ -125,6 +126,88 @@ class _WinningTilePageState extends State<WinningTilePage> {
       'loserIndices': loserIndices,
       'points': _calculatedPoints,
       'tiles': List<String>.from(_selectedTiles),
+    });
+  }
+
+  void _manualInputFaan() async {
+    // Check loser selection (same as confirm logic)
+    if (!_selectedLosers.contains(true)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select at least one losing player')),
+      );
+      return;
+    }
+
+    // Show manual input dialog
+    final manualFaan = await showDialog<int>(
+      context: context,
+      builder: (context) {
+        final TextEditingController controller = TextEditingController();
+        return AlertDialog(
+          title: const Text('Enter Manual Faan'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: controller,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  hintText: 'Enter faan value (0-15)',
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'Enter a value between 0 and $maxFaan',
+                style: TextStyle(color: Colors.grey[600], fontSize: 12),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, null),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                final input = controller.text;
+                final parsed = int.tryParse(input);
+                
+                if (parsed == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Please enter a valid number')),
+                  );
+                  return;
+                }
+
+                if (parsed < 0 || parsed > maxFaan) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Value must be between 0 and $maxFaan')),
+                  );
+                  return;
+                }
+
+                Navigator.pop(context, parsed);
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (manualFaan == null) return;
+
+    // Return data to previous screen
+    Navigator.pop(context, {
+      'winnerIndex': _selectedWinnerIndex,
+      'loserIndices': _selectedLosers
+          .asMap()
+          .entries
+          .where((entry) => entry.value)
+          .map((entry) => entry.key)
+          .toList(),
+      'points': manualFaan,
+      'tiles': const [], // Empty array for manual input
     });
   }
 
@@ -332,20 +415,19 @@ class _WinningTilePageState extends State<WinningTilePage> {
       callback = _isLoading ? null : _confirmSelection;
     } else if (text == 'Extra') {
       callback = () async {
-        _config = {};
         final config = await showDialog<Map<String, dynamic>>(
           context: context,
           builder: (context) => const FaanConfigDialog(),
         );
         
         if (config != null) {
-          _config = config;
+          setState(() {
+            _config = config;
+          });
         }
       };
     } else if (text == 'Manual') {
-      callback = () {
-        // Implement Manual functionality
-      };
+      callback = _isLoading ? null : _manualInputFaan;
     }
 
     return CustomButton(
