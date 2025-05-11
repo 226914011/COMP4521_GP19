@@ -254,6 +254,7 @@ class _MainPageState extends State<MainPage> {
         MediaQuery.of(context).size; // Keep if CustomButton uses it
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: SafeArea(
         child: Column(
           children: [
