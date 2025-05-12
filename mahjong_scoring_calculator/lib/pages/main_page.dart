@@ -484,6 +484,15 @@ class _MainPageState extends State<MainPage> {
         );
       }
     }
+    // Create an array to track who won the current game
+    final List<bool> winnersint = List.filled(4, false);
+    final List<int> scoresint = List.filled(4, 0);
+
+    await dbHelper.insertGame(
+      matchId: _currentMatchId,
+      points: scoresint,
+      isWinner: winnersint,
+    );
     return _currentMatchId;
   }
 

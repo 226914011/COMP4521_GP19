@@ -169,7 +169,12 @@ class DatabaseHelper {
 
   Future<int> _insertParticipant(MatchParticipant participant) async {
     final db = await instance.database;
-    return await db.insert('Match_Participant', participant.toMap());
+    // Convert the participant to map and ensure boolean is stored as integer
+    final map = participant.toMap();
+    if (map['is_dealer'] != null) {
+      map['is_dealer'] = map['is_dealer'] == true ? 1 : 0;
+    }
+    return await db.insert('Match_Participant', map);
   }
 
   // Game operations
