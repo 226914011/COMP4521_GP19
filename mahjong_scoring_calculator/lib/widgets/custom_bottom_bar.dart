@@ -10,7 +10,7 @@ import '../pages/settings_page.dart'; // Add this import
 import '../services/settings_service.dart';
 
 class CustomBottomBar extends StatefulWidget {
-  final VoidCallback? onHelpPressed;
+  //final VoidCallback? onHelpPressed;
   final VoidCallback? onSettingsPressed;
   final List<String>?
       playerNames; // Add player names parameter for WinningTilePage
@@ -18,7 +18,7 @@ class CustomBottomBar extends StatefulWidget {
 
   const CustomBottomBar({
     super.key,
-    this.onHelpPressed,
+    //this.onHelpPressed,
     this.onSettingsPressed,
     this.playerNames,
     this.hideDebugButtons = false,
@@ -99,7 +99,7 @@ class _CustomBottomBarState extends State<CustomBottomBar> {
     );
   }
 
-  void _handleHelp() => widget.onHelpPressed?.call();
+  //void _handleHelp() => widget.onHelpPressed?.call();
   void _handleSettings() {
     if (widget.onSettingsPressed != null) {
       // Use the provided callback if available
@@ -177,13 +177,13 @@ class _CustomBottomBarState extends State<CustomBottomBar> {
             bottom: 0,
             child: Row(
               children: [
-                _buildButton(
-                  width: buttonWidth,
-                  height: barHeight,
-                  icon: Icons.help,
-                  label: 'Help',
-                  onPressed: _handleHelp,
-                ),
+                // _buildButton(
+                //   width: buttonWidth,
+                //   height: barHeight,
+                //   icon: Icons.help,
+                //   label: 'Help',
+                //   onPressed: _handleHelp,
+                // ),
                 _buildButton(
                   width: buttonWidth,
                   height: barHeight,
